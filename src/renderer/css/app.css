@@ -1,0 +1,72 @@
+body {
+    padding: 10px;
+    height: 100%;
+}
+
+h3 {
+    clear: both;
+    margin-top: 10px;
+}
+
+.label {
+    clear: both;
+    width: 200px;
+    display: inline-block;
+    vertical-align: top;
+  }
+  
+ .label2 {
+    padding-left: 10px;
+    margin-right: -10px;
+  }
+  
+ .value {
+    display: inline-block;
+  }
+
+  .selected-peer {
+    background-color: yellow;
+  }
+  
+  .peer {
+    cursor: pointer;
+  }
+
+  .led {
+    margin: 0 auto;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+  .led-green {
+    background-color: #ABFF00;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #304701 0 -1px 9px, #89FF00 0 2px 12px;
+  }
+  .led-red {
+    background-color: #F00;
+    border-radius: 50%;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 7px 1px, inset #441313 0 -1px 9px, rgba(255, 0, 0, 0.5) 0 2px 12px;
+    }
+  
+  .console-container {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 101px;
+    bottom: 20px;
+   }
+
+  .editor-container {
+    display: flex;
+    flex: 1;
+  }
+
+  .el-tabs__content {
+    overflow: visible;
+    position: inherit;
+  }
+
+  .node-tabs {
+    min-height: 30px;
+  }
+

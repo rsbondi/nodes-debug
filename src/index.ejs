@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>nodes-rpc</title>
+    <% if (htmlWebpackPlugin.options.nodeModules) { %>
+      <!-- Add `node_modules/` to global paths so `require` works properly in development -->
+      <script>
+        require('module').globalPaths.push('<%= htmlWebpackPlugin.options.nodeModules.replace(/\\/g, '\\\\') %>')
+      </script>
+    <% } %>
+  </head>
+  <body>
+    <div id="app"></div>
+    <!-- Set `__static` path to static files in production -->
+    <script>
+      if (process.env.NODE_ENV !== 'development') window.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+    </script>
+    <script>
+      // Monaco uses a custom amd loader that over-rides node's require.
+      // Keep a reference to node's require so we can restore it after executing the amd loader file.
+      var nodeRequire = global.require;
+    </script>
+    <% if (htmlWebpackPlugin.options.environment.production){ %>
+    <script src="../../node_modules/monaco-editor/min/vs/loader.js"></script>
+    <% } %>
+    <% if (!htmlWebpackPlugin.options.environment.production){ %>
+    <script src="../node_modules/monaco-editor/min/vs/loader.js"></script>
+    <% } %>
+    <script>
+      // Save Monaco's amd require and restore Node's require
+      var amdRequire = global.require;
+      global.require = nodeRequire;
+    </script>
+
+    <!-- webpack builds are automatically injected -->
+  </body>
+</html>
