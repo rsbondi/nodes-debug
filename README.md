@@ -1,4 +1,4 @@
-# nodes-rpc
+# nodes-debug
 
 ## Description
 
@@ -40,7 +40,7 @@ To add a node to the current configuration, click the + icon to the upper right 
 
 ![dialog](image/dialog.png)
 
-All parameters are optional, defaults will be used, **Name** is recommended as it appears in the tab, also **port** since the default is mainnet
+All parameters are optional, defaults will be used, **Name** is recommended as it appears in the tab, also **port**(or **config** if `rpcport` is set there) since the default is mainnet
 
 * **Node Type**: The type of the node *(currently only bitcoin is supported)*
 * **Name**: What you want to call it, this will appear it it's tab
