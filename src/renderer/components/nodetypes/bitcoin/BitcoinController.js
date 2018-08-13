@@ -144,17 +144,23 @@ class BitcoinController {
                 if(ti===0) return
                 const prevToken =  tokens[ti-1] 
                 const tokenVal = val.slice(t.offset, ti == tokens.length-1 ? val.length : tokens[ti+1].offset)
-                if(prevToken.type ==`white.${this.constructor.lang}`) {
+                if(prevToken.type ==`white.${this.constructor.lang}` || prevToken.type==`bracket.square.open.${this.constructor.lang}`) {
                     if((t.type==`bracket.square.open.${this.constructor.lang}` || t.type==`bracket.curly.open.${this.constructor.lang}`))  {
                         brackets.unshift('')
-                    } else if(!brackets.length) params.push(JSON.parse(tokenVal))                    
+                    } else if(!brackets.length) {
+                        try {
+                            params.push(JSON.parse(tokenVal))   
+                        } catch(e) {console.log('invalid JSON', tokenVal)}
+                    }                 
                 }
                 if(brackets.length && t.type != `white.${this.constructor.lang}`) {
                      brackets[0]+= tokenVal
                      if((t.type==`bracket.square.close.${this.constructor.lang}` || t.type==`bracket.curly.close.${this.constructor.lang}`)) {
                          if(brackets.length == 1) {
                             const done = brackets.shift() 
-                            params.push(JSON.parse(done))
+                            try {
+                                params.push(JSON.parse(done))
+                            } catch(e) {console.log('invalid JSON', done)}
                          } else {
                            const raw = brackets.shift()
                            brackets[0] += raw
