@@ -25,8 +25,8 @@
     "postinstall": ""
   },
   "build": {
-    "productName": "nodes-rpc",
-    "appId": "net.richardbondi.nodes-rpc",
+    "productName": "nodes-debug",
+    "appId": "net.richardbondi.nodes-debug",
     "directories": {
       "output": "build"
     },

@@ -76,7 +76,7 @@ let infoInterval;
 import { empties } from "./misc";
 
 export default {
-  name: "nodes-rpc",
+  name: "nodes-debug",
   components: { InfoView, PeersView, ConsoleView },
   data() {
     return {
@@ -105,7 +105,7 @@ export default {
       });
     },
     console() {
-      const fileName = `${os.homedir()}/.nodes-rpc/last.conf`;
+      const fileName = `${os.homedir()}/.nodes-debug/last.conf`;
     
      if(this.$store.state.Nodes.consoleReady)
         fs.readFile(fileName, "utf-8", (err, data) => {
@@ -160,7 +160,7 @@ export default {
       });
     },
     saveLastConfig(fileName) {
-      const dir = `${os.homedir()}/.nodes-rpc`;
+      const dir = `${os.homedir()}/.nodes-debug`;
 
       function writeIt() {
         fs.writeFile(`${dir}/last.conf`, fileName, err => {
@@ -193,6 +193,7 @@ export default {
                 this.$message.error(err);
               } else {
                 this.$message("config saved!");
+                this.saveLastConfig(savePath);
               }
             });
           }
@@ -433,7 +434,7 @@ export default {
       nodetypes.forEach(n => this.nodeTypes.push({ index: `${n}`, name: n }));
 
       /* sample to load user nodetypes
-        const dummy = fs.readFileSync('/home/richard/projects/zPlay/nodes-rpc/dist/Console.js', 'utf8')
+        const dummy = fs.readFileSync('/home/richard/projects/zPlay/nodes-debug/dist/Console.js', 'utf8')
         const script = document.createElement('script')
         script.textContent = dummy
         document.body.appendChild(script)
