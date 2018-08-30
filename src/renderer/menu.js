@@ -32,6 +32,14 @@ export class MenuHandler {
             ]
         }))
 
+        menu.append(new MenuItem({
+            label: 'Theme',
+            submenu: [
+                { label: 'Light', click() { app.handleMenu('theme-light') } },
+                { label: 'Dark', click() { app.handleMenu('theme-dark') } },
+            ]
+        }))
+        
         if(process.env.NODE_ENV == 'development')
             menu.append(new MenuItem({
                 label: 'Dev',

@@ -21,8 +21,11 @@ function createWindow () {
     height: 563,
     useContentSize: true,
     width: 1000,
-    webPreferences: {webSecurity: false}
+    webPreferences: {webSecurity: false},
+    icon: 'bug.png'
   })
+
+  // throw ({message: require('path').join(__static,'bug.png')})
 
   // mainWindow.webContents.openDevTools()
   mainWindow.maximize()

@@ -75,6 +75,14 @@ import ConsoleView from "./components/Console";
 let infoInterval;
 import { empties } from "./misc";
 
+const styles = {
+  foreground: ["body", ".el-tabs__item",".el-table th", ".el-table tr"], // #000 #ccc
+  background: ["body", ".el-tabs__nav-wrap::after", ".el-table__body-wrapper",".el-table th", ".el-table tr"], // #fff #444
+  trim: [".el-tabs--card>.el-tabs__header .el-tabs__nav", ".el-tabs--card>.el-tabs__header .el-tabs__item.is-active",
+         ".el-tabs--card>.el-tabs__header .el-tabs__item", ".el-tabs--card>.el-tabs__header", ".editor",
+         ".el-tabs__new-tab"] // #e4e7ed #888
+}
+
 export default {
   name: "nodes-debug",
   components: { InfoView, PeersView, ConsoleView },
@@ -92,7 +100,8 @@ export default {
       formnode: {},
       nodeTypes: [],
       online: navigator.onLine,
-      controllerOnline: false
+      controllerOnline: false,
+      theme: 'light'
     };
   },
   computed: {
@@ -146,7 +155,15 @@ export default {
           return;
         }
         try {
-          const nodes = JSON.parse(data);
+          const config = JSON.parse(data);
+          let nodes, theme
+          if(Array.isArray(config)) {
+            nodes = config
+            theme = 'light'
+          } else {
+            ({nodes, theme} = config)
+          }
+          this.handleTheme(theme)
           this.$store.commit("node_remove_all");
           nodes.forEach(async n => {
             await this._commitNewNode({ index: n.index, node: n });
@@ -178,6 +195,31 @@ export default {
         }
       });
     },
+    handleTheme(t) {
+      let editorTheme, foreground, background, trim
+      if(t=='dark') 
+        [editorTheme, foreground, background, trim] = ['vs-dark', '#ccc', '#383838', '#888']
+      else
+        [editorTheme, foreground, background, trim] = ['vs-light', '#000', '#fff', '#e4e7ed']
+        monaco.editor.setTheme(editorTheme)
+        let stylestr = `
+${styles.foreground.join(', ')} {color: ${foreground};} 
+${styles.background.join(', ')} {background: ${background};} 
+${styles.trim.join(', ')} {border-color: ${trim};} 
+.el-tabs__nav-wrap::after, .el-table::before {background-color: ${trim};}
+.el-table__body tr.current-row>td, .el-table__expanded-cell, .el-table__row:hover>td {background-color: ${background};}
+.el-tabs--card>.el-tabs__header .el-tabs__item.is-active {border-bottom-color: ${background};}
+.el-table td, .el-table th.is-leaf {border-bottom: 1px solid ${trim};}
+`
+        let styleElement = document.head.querySelector('#themestyle')
+        if(!styleElement) {
+          styleElement = document.createElement('style')
+          styleElement.id = 'themestyle'
+          document.head.appendChild(styleElement)
+        }
+        styleElement.innerHTML = stylestr
+        this.theme = t
+    },
     handleMenu(e) {
       switch (e) {
         case "cfg-node":
@@ -188,7 +230,7 @@ export default {
         case "cfg-save":
           var savePath = dialog.showSaveDialog({});
           if (savePath) {
-            fs.writeFile(savePath, JSON.stringify(this.nodes), err => {
+            fs.writeFile(savePath, JSON.stringify({nodes: this.nodes, theme: this.theme}), err => {
               if (err) {
                 this.$message.error(err);
               } else {
@@ -225,6 +267,12 @@ export default {
         case "cmd-exec":
           window.commandEditor.getAction("action-execute-command").run();
           break;
+        case "theme-light":
+          this.handleTheme('light')
+          break
+        case "theme-dark":
+          this.handleTheme('dark')
+          break
       }
     },
     handleNewNode(e) {
