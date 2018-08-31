@@ -11,6 +11,13 @@ export class MenuHandler {
             { label: 'Save', click() { app.handleMenu('cfg-save') } },
             { label: 'Load', click() { app.handleMenu('cfg-load') } },
             { label: 'Edit Node', click() { app.handleMenu('cfg-node') } },
+            {
+                label: 'Theme',
+                submenu: [
+                    { label: 'Light', click() { app.handleMenu('theme-light') } },
+                    { label: 'Dark', click() { app.handleMenu('theme-dark') } },
+                ]
+            }
           ]
         }))
         
@@ -29,14 +36,6 @@ export class MenuHandler {
             { label: 'Clear', click() { app.handleMenu('result-clear') } },
             { label: 'Save', click() { app.handleMenu('result-save') } },
             { label: 'Load', click() { app.handleMenu('result-load') } },
-            ]
-        }))
-
-        menu.append(new MenuItem({
-            label: 'Theme',
-            submenu: [
-                { label: 'Light', click() { app.handleMenu('theme-light') } },
-                { label: 'Dark', click() { app.handleMenu('theme-dark') } },
             ]
         }))
         
