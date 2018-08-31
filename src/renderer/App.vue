@@ -76,11 +76,11 @@ let infoInterval;
 import { empties } from "./misc";
 
 const styles = {
-  foreground: ["body", ".el-tabs__item",".el-table th", ".el-table tr"], // #000 #ccc
-  background: ["body", ".el-tabs__nav-wrap::after", ".el-table__body-wrapper",".el-table th", ".el-table tr"], // #fff #444
+  foreground: ["body", ".el-tabs__item",".el-table th", ".el-table tr", ".el-form-item__label", ".el-dialog__title", ".el-input__inner"],
+  background: ["body", ".el-tabs__nav-wrap::after", ".el-table__body-wrapper",".el-table th", ".el-table tr", ".el-dialog", ".el-input__inner"],
   trim: [".el-tabs--card>.el-tabs__header .el-tabs__nav", ".el-tabs--card>.el-tabs__header .el-tabs__item.is-active",
          ".el-tabs--card>.el-tabs__header .el-tabs__item", ".el-tabs--card>.el-tabs__header", ".editor",
-         ".el-tabs__new-tab"] // #e4e7ed #888
+         ".el-tabs__new-tab", ".el-input__inner"] // #e4e7ed #888
 }
 
 export default {
