@@ -347,7 +347,6 @@ class BitcoinController {
                                 }
                             }]
                         ],
-
                     },
                     keywords: this._helpers.map(h => h.command), //.concat('true', 'false', 'null',),
                     exponent: /[eE][\-+]?[0-9]+/,
@@ -411,6 +410,7 @@ class BitcoinController {
                         let word = ''
                         if (block.length) word = block[0].text.split(' ')[0]
                         if (word) return this._getHelpContent(word).then(response => {
+                            if(!response.data) return {}
                             let lines = response.data.result.split("\n")
                             let args = false, desc = false
                             const obj = lines.reduce((o, c, i) => {
@@ -498,6 +498,13 @@ class BitcoinController {
                         }, [])
                     }
                 });
+                monaco.languages.setLanguageConfiguration(this.lang, {
+                    autoClosingPairs: [
+                        {open: '"', close: '"'},
+                        {open: '{', close: '}'},
+                        {open: '[', close: ']'},
+                    ]
+                })
                 resolve()
             }).catch(e => reject(e))
         })
