@@ -72,17 +72,8 @@ import InfoView from "./components/Info";
 import PeersView from "./components/Peers";
 import ConsoleView from "./components/Console";
 
-
 let infoInterval;
 import { empties } from "./misc";
-
-const styles = {
-  foreground: ["body", ".el-tabs__item",".el-table th", ".el-table tr", ".el-form-item__label", ".el-dialog__title", ".el-input__inner"],
-  background: ["body", ".el-tabs__nav-wrap::after", ".el-table__body-wrapper",".el-table th", ".el-table tr", ".el-dialog", ".el-input__inner"],
-  trim: [".el-tabs--card>.el-tabs__header .el-tabs__nav", ".el-tabs--card>.el-tabs__header .el-tabs__item.is-active",
-         ".el-tabs--card>.el-tabs__header .el-tabs__item", ".el-tabs--card>.el-tabs__header", ".editor",
-         ".el-tabs__new-tab", ".el-input__inner"] // #e4e7ed #888
-}
 
 export default {
   name: "nodes-debug",
@@ -197,28 +188,19 @@ export default {
       });
     },
     handleTheme(t) {
-      let editorTheme, foreground, background, trim
-      if(t=='dark') 
-        [editorTheme, foreground, background, trim] = ['vs-dark', '#ccc', '#383838', '#888']
-      else
-        [editorTheme, foreground, background, trim] = ['vs-light', '#000', '#fff', '#e4e7ed']
-        monaco.editor.setTheme(editorTheme)
-        let stylestr = `
-${styles.foreground.join(', ')} {color: ${foreground};} 
-${styles.background.join(', ')} {background: ${background};} 
-${styles.trim.join(', ')} {border-color: ${trim};} 
-.el-tabs__nav-wrap::after, .el-table::before {background-color: ${trim};}
-.el-table__body tr.current-row>td, .el-table__expanded-cell, .el-table__row:hover>td {background-color: ${background};}
-.el-tabs--card>.el-tabs__header .el-tabs__item.is-active {border-bottom-color: ${background};}
-.el-table td, .el-table th.is-leaf {border-bottom: 1px solid ${trim};}
-`
+      console.log(__dirname)
+      const href = `file:///${path.resolve(__dirname)}/css/theme/${t}/styles.css`
         let styleElement = document.head.querySelector('#themestyle')
         if(!styleElement) {
-          styleElement = document.createElement('style')
+          styleElement = document.createElement('link')
+          styleElement.rel = "stylesheet"
+          styleElement.type = "text/css"
           styleElement.id = 'themestyle'
           document.head.appendChild(styleElement)
         }
-        styleElement.innerHTML = stylestr
+        // styleElement.innerHTML = stylestr
+        styleElement.href = href
+        monaco.editor.setTheme(`vs-${t}`)
         this.theme = t
     },
     handleMenu(e) {
