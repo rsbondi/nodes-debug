@@ -188,7 +188,6 @@ export default {
       });
     },
     handleTheme(t) {
-      console.log(__dirname)
       const href = `file:///${path.resolve(__dirname)}/css/theme/${t}/styles.css`
         let styleElement = document.head.querySelector('#themestyle')
         if(!styleElement) {
@@ -356,7 +355,8 @@ export default {
           resolve();
           return;
         }
-
+        
+        // TODO: PATH - join and check env
         const dir = path.resolve(`${__dirname}/../../dist/electron/build_nodetypes/${currentNode.type}`)
         let nodetypeModules;
         try {
@@ -452,18 +452,10 @@ export default {
     const path = require("path");
 
     try {
-      const dir = path.join(__dirname, "components", "nodetypes");
+      const dir = path.resolve(`${__dirname}/../../dist/electron/build_nodetypes`) // TODO: PATH - join and check env
 
       const nodetypes = fs.readdirSync(dir);
       nodetypes.forEach(n => this.nodeTypes.push({ index: `${n}`, name: n }));
-
-      /* sample to load user nodetypes
-        const dummy = fs.readFileSync('/home/richard/projects/zPlay/nodes-debug/dist/Console.js', 'utf8')
-        const script = document.createElement('script')
-        script.textContent = dummy
-        document.body.appendChild(script)
-        Vue.component(ConsoleComponent.name, ConsoleComponent)
-*/
     } catch (e) {
       alert(e);
     }
