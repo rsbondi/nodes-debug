@@ -72,6 +72,7 @@ import InfoView from "./components/Info";
 import PeersView from "./components/Peers";
 import ConsoleView from "./components/Console";
 
+
 let infoInterval;
 import { empties } from "./misc";
 
@@ -374,13 +375,7 @@ ${styles.trim.join(', ')} {border-color: ${trim};}
           return;
         }
 
-        // new type, load from filesystem
-        const dir = path.join(
-          __dirname,
-          "components",
-          "nodetypes",
-          currentNode.type
-        );
+        const dir = path.resolve(`${__dirname}/../../dist/electron/build_nodetypes/${currentNode.type}`)
         let nodetypeModules;
         try {
           nodetypeModules = fs.readdirSync(dir);
@@ -390,12 +385,10 @@ ${styles.trim.join(', ')} {border-color: ${trim};}
         }
         const promises = [];
         nodetypeModules.forEach(mod => {
-          if (mod.slice(-4) == ".vue")
-            promises.push(
-              import(`./components/nodetypes/${currentNode.type}/${mod}`)
-            );
+          if (mod.slice(-13) != "Controller.js")
+            promises.push(import(`../../dist/electron/build_nodetypes/${currentNode.type}/${mod}` /* webpackIgnore: true */));
           else {
-            import(`./components/nodetypes/${currentNode.type}/${mod}`)
+            import(`../../dist/electron/build_nodetypes/${currentNode.type}/${mod}` /* webpackIgnore: true */)
               .then(c => {
                 this.$store.commit("node_controller_type_loaded", c.default);
                 const controller = new c.default.controller(currentNode);
@@ -407,13 +400,14 @@ ${styles.trim.join(', ')} {border-color: ${trim};}
                 });
                 this.callService();
               })
-              .catch(e => {console.log(e); resolve()});
+            .catch(e => {console.log(e); resolve()});
           }
         });
         Promise.all(promises)
           .then(comps => {
-            comps.forEach(comp =>
-              Vue.component(comp.default.name, comp.default)
+            comps.forEach(comp => {
+              Vue.component(comp.name, comp)
+            }
             );
             this.$store.commit("node_type_loaded", currentNode.type);
             resolve();
