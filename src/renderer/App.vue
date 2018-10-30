@@ -66,6 +66,7 @@ const { Menu, MenuItem, dialog } = remote;
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
+const requireString = require('require-from-string')
 import { MenuHandler } from "./menu";
 import Empty from "./components/Empty";
 import InfoView from "./components/Info";
@@ -357,7 +358,7 @@ export default {
         }
         
         // TODO: PATH - join and check env
-        const dir = path.resolve(`${__dirname}/../../dist/electron/build_nodetypes/${currentNode.type}`)
+        const dir = path.resolve(`${__dirname}/../../dist/build_nodetypes/${currentNode.type}`)
         let nodetypeModules;
         try {
           nodetypeModules = fs.readdirSync(dir);
@@ -367,13 +368,24 @@ export default {
         }
         const promises = [];
         nodetypeModules.forEach(mod => {
-          if (mod.slice(-13) != "Controller.js")
-            promises.push(import(`../../dist/electron/build_nodetypes/${currentNode.type}/${mod}` /* webpackIgnore: true */));
-          else {
-            import(`../../dist/electron/build_nodetypes/${currentNode.type}/${mod}` /* webpackIgnore: true */)
+          if (mod.slice(-13) != "Controller.js") {
+            promises.push(new Promise((resolve, reject) => {
+              const modpath = path.join(dir,mod)
+              const modString = fs.readFileSync(modpath, 'utf8')
+              const modObj = requireString(modString)
+              resolve(modObj)
+            }))
+
+          } else {
+            (new Promise((resolve, reject) => {
+              const modpath = path.join(dir,mod)
+              const modString = fs.readFileSync(modpath, 'utf8')
+              const modObj = requireString(modString)
+              resolve(modObj)
+            }))
               .then(c => {
-                this.$store.commit("node_controller_type_loaded", c.default);
-                const controller = new c.default.controller(currentNode);
+                this.$store.commit("node_controller_type_loaded", c);
+                const controller = new c.controller(currentNode);
                 this.$store.commit("node_set_index", currentNode.index);
                 this.$store.commit("node_instantiate_controller", {
                   index: currentNode.index,
@@ -452,7 +464,7 @@ export default {
     const path = require("path");
 
     try {
-      const dir = path.resolve(`${__dirname}/../../dist/electron/build_nodetypes`) // TODO: PATH - join and check env
+      const dir = path.resolve(`${__dirname}/../../dist/build_nodetypes`) // TODO: PATH - join and check env
 
       const nodetypes = fs.readdirSync(dir);
       nodetypes.forEach(n => this.nodeTypes.push({ index: `${n}`, name: n }));

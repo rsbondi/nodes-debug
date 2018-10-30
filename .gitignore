@@ -1,5 +1,6 @@
 .DS_Store
 dist/electron/*
+dist/build_nodetypes/*
 dist/web/*
 build/*
 !build/icons
