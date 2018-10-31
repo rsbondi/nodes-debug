@@ -76,6 +76,12 @@ import ConsoleView from "./components/Console";
 let infoInterval;
 import { empties } from "./misc";
 
+function requireFromPath(dir, mod) {
+  const modpath = path.join(dir,mod)
+  const modString = fs.readFileSync(modpath, 'utf8')
+  return requireString(modString, modpath)
+}
+
 export default {
   name: "nodes-debug",
   components: { InfoView, PeersView, ConsoleView },
@@ -368,21 +374,16 @@ export default {
           return
         }
         const promises = [];
+
         nodetypeModules.forEach(mod => {
           if (mod.slice(-13) != "Controller.js") {
             promises.push(new Promise((resolve, reject) => {
-              const modpath = path.join(dir,mod)
-              const modString = fs.readFileSync(modpath, 'utf8')
-              const modObj = requireString(modString)
-              resolve(modObj)
+              resolve(requireFromPath(dir, mod))
             }))
 
           } else {
             (new Promise((resolve, reject) => {
-              const modpath = path.join(dir,mod)
-              const modString = fs.readFileSync(modpath, 'utf8')
-              const modObj = requireString(modString)
-              resolve(modObj)
+              resolve(requireFromPath(dir, mod))
             }))
               .then(c => {
                 this.$store.commit("node_controller_type_loaded", c);

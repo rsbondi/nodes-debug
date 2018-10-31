@@ -1,5 +1,4 @@
-const path = require('path')
-const { BitcoinController } = require(`${path.resolve(__dirname)}/dist/build_nodetypes/bitcoin/BitcoinController`)
+const { BitcoinController } = require('../bitcoin/BitcoinController')
 
 class BtcdController extends BitcoinController{
     static register(editor, resultEditor, store) {
@@ -14,7 +13,6 @@ class BtcdController extends BitcoinController{
     static _register() {
         const inf = BtcdController.registerInfo
         super.register(inf.editor, inf.resultEditor, inf.store).then(r => {
-            console.log('super registered')
             inf.resolve()
         })
     }
@@ -32,7 +30,6 @@ class BtcdController extends BitcoinController{
                         self._infoTime = new Date().getTime()
                         
                         resolve(Object.assign({}, self._info))  // assign to isolate from store
-                        console.log('interval: _info', self._info)
                     }).catch(reject)
                 else    
                     setTimeout(doInterval, 100)
@@ -71,9 +68,8 @@ class BtcdController extends BitcoinController{
 
     }
     update(cfg) {
-        if(window._ws) return
-        console.log('update btcd', this)
-        window._ws = 1
+        if(window._ws_btcd) return
+        window._ws_btcd = 1
         fs = require('fs')
         const os = require('os')
         this._host = cfg && cfg.host || '127.0.0.1'
@@ -108,7 +104,6 @@ class BtcdController extends BitcoinController{
               ca: [cert]
             });
             ws.on('open', () => {
-                console.log('CONNECTED');
                 if(!BtcdController.registered) {
                     BtcdController._register()
                     BtcdController.registered = true
@@ -123,7 +118,6 @@ class BtcdController extends BitcoinController{
             }
             ws.on('message', (data, flags) => {
                 const obj = JSON.parse(data)
-                console.log('data', obj)
                 const key = obj.id
                if(self.wspromises && self.wspromises[key]) {
                 _resolve(key, obj)
@@ -143,7 +137,6 @@ class BtcdController extends BitcoinController{
     }
 
     _postRPC(payload) {
-        console.log('postRPC', payload)
         if(this._notls) return super._postRPC(payload) 
         else {
             var self = this
