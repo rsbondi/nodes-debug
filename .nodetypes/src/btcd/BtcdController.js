@@ -61,7 +61,6 @@ class BtcdController extends BitcoinController{
                     
                     this._info.version = js.data.result.version
                     this._info.subversion = js.data.result.protocolversion
-                    console.log('getNetInfo: _info', this._info)
                     resolve()
                 } catch(wtf) {resolve('network error')}
             } catch (e) { resolve() }
@@ -69,8 +68,6 @@ class BtcdController extends BitcoinController{
 
     }
     update(cfg) {
-        // if(window._ws_btcd) return
-        // window._ws_btcd = 1
         fs = require('fs')
         const os = require('os')
         this._host = cfg && cfg.host || '127.0.0.1'
