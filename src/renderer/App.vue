@@ -288,7 +288,7 @@ export default {
     },
     saveNode() {
       this.$store.commit("node_update_controller", this.formnode);
-      const controller = this.$store.state.Nodes.controllerInstances[
+      const controller = window.controllerInstances[
         this.formnode.index
       ];
       controller.update(this.formnode);
@@ -329,7 +329,7 @@ export default {
       return new Promise((resolve, reject) => {
         if (~this.$store.state.Nodes.loadedTypes.indexOf(currentNode.type)) {
           // already have type, check if model is current
-          if (!~Object.keys(this.$store.state.Nodes.controllerInstances).indexOf(currentNode.index)) {
+          if (!~Object.keys(window.controllerInstances).indexOf(currentNode.index)) {
             const controller = new this.$store.state.Nodes.controllers[
               currentNode.type
             ](currentNode);
@@ -417,7 +417,7 @@ export default {
         `get${this.activePage.slice(0, 1).toUpperCase()}${this.activePage.slice(
           1
         )}`;
-      const controller = this.$store.state.Nodes.controllerInstances[this.$store.state.Nodes.currentIndex]
+      const controller = window.controllerInstances[this.$store.state.Nodes.currentIndex]
       return controller[service]()
         .then(info => {
           this.controllerOnline = controller.online

@@ -71,7 +71,7 @@ export default {
         contextMenuOrder: 1.1,
 
         run: ed => {
-          this.$store.state.Nodes.controllerInstances[
+          window.controllerInstances[
             this.$store.state.Nodes.currentIndex
           ].execute(ed);
         }

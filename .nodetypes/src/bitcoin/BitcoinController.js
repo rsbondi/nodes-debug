@@ -239,7 +239,7 @@ class BitcoinController {
                 resolve(this.helpContent[key])
             })
             return promise
-        } else return this._store.state.Nodes.controllerInstances[this._store.state.Nodes.currentIndex]._postRPC({ method: 'help', params: [key] }).then(resp => {
+        } else return window.controllerInstances[this._store.state.Nodes.currentIndex]._postRPC({ method: 'help', params: [key] }).then(resp => {
             this.helpContent[key] = resp
             return resp
         })
@@ -301,7 +301,7 @@ class BitcoinController {
             this.models = {} // models mutate on every keystroke and do not play well with vuex
             this.commandEditor = editor
             this.resultEditor = resultEditor
-            store.state.Nodes.controllerInstances[store.state.Nodes.currentIndex]._getHelp().then(response => {
+            window.controllerInstances[store.state.Nodes.currentIndex]._getHelp().then(response => {
                 if(!response) { reject(); return }
                 this._helpers = response.data.result.split('\n').reduce((o, c, i) => {
                     if (c && !c.indexOf('==') == 0) {
@@ -513,7 +513,7 @@ class BitcoinController {
 }
 
 BitcoinController.lang = 'bitcoin-rpc'
-export default {
+module.exports = {
     type: 'bitcoin',
     controller: BitcoinController,
     BitcoinController: BitcoinController
