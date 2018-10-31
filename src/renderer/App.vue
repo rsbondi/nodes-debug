@@ -189,7 +189,9 @@ export default {
       });
     },
     handleTheme(t) {
-      const href = `file:///${path.resolve(__dirname)}/css/theme/${t}/styles.css`
+      const href = process.env.NODE_ENV === 'development'
+                    ? `file:///${path.resolve(__dirname)}/css/theme/${t}/styles.css`
+                    : `file:///${path.resolve(__dirname)}/../../src/renderer/css/theme/${t}/styles.css`
         let styleElement = document.head.querySelector('#themestyle')
         if(!styleElement) {
           styleElement = document.createElement('link')
@@ -198,7 +200,6 @@ export default {
           styleElement.id = 'themestyle'
           document.head.appendChild(styleElement)
         }
-        // styleElement.innerHTML = stylestr
         styleElement.href = href
         monaco.editor.setTheme(`vs-${t}`)
         this.theme = t
