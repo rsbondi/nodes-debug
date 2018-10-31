@@ -99,6 +99,11 @@ Commands are executed by pressing F5, pressing the codelens helper or from the c
 # Disclaimer
 This is meant as a development tool and suggested to use on testnet or regtest, use on mainnet at your own risk.
 
+#WIP
+
+refactoring is taking place on the `refactor-compile` branch of this repository to allow for multiple
+node types, currently btcd, help with testing would be appreciated
+
 ---
 
 This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).
