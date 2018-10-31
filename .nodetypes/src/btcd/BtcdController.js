@@ -12,6 +12,7 @@ class BtcdController extends BitcoinController{
     }
     static _register() {
         const inf = BtcdController.registerInfo
+        if(!inf) return
         super.register(inf.editor, inf.resultEditor, inf.store).then(r => {
             inf.resolve()
         })
@@ -24,11 +25,11 @@ class BtcdController extends BitcoinController{
                     Promise.all([
                         self._getBlock(),
                         self._getMempool(),
+                        self._getNetInfo(),
                         //self._getBanned(),
                         self._getPeerInfo()]
                     ).then(() => {
                         self._infoTime = new Date().getTime()
-                        
                         resolve(Object.assign({}, self._info))  // assign to isolate from store
                     }).catch(reject)
                 else    
@@ -68,8 +69,8 @@ class BtcdController extends BitcoinController{
 
     }
     update(cfg) {
-        if(window._ws_btcd) return
-        window._ws_btcd = 1
+        // if(window._ws_btcd) return
+        // window._ws_btcd = 1
         fs = require('fs')
         const os = require('os')
         this._host = cfg && cfg.host || '127.0.0.1'
@@ -108,7 +109,6 @@ class BtcdController extends BitcoinController{
                     BtcdController._register()
                     BtcdController.registered = true
                 }
-                //this._getNetInfo()
             });
 
             let self = this
