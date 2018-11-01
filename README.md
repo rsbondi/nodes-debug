@@ -17,8 +17,7 @@ The project is designed such that multiple node types can be added in the future
 npm install
 
 # build node types
-# FROM .nodetypes DIRECTORY
-node index.js
+npm run compile
 
 # serve with hot reload at localhost:9080
 npm run dev

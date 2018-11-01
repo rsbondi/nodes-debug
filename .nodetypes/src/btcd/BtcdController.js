@@ -76,11 +76,11 @@ class BtcdController extends BitcoinController{
     
         const range = new monaco.Range(lineCount, lastLineLength, lineCount, lastLineLength);
     
-        model.result.applyEdits([
-        { range: range, text: "/* NOTIFICATION */\n"+text }
-        ])
-        model.result.modifyPosition({ lineNumber: model.result.getLineCount(), column: 0 })
-                
+        model.result.pushEditOperations([new monaco.Selection(1, 1, 1, 1)],
+                        [{ range: range, text: "/* NOTIFICATION */\n"+text }],
+                        () => [new monaco.Selection(model.result.getLineCount(),0,model.result.getLineCount(),0)])
+        if(this.constructor.getIndex() == this.id)
+            this.constructor.resultEditor.revealPosition({ lineNumber: this.constructor.resultEditor.getModel().getLineCount(), column: 0 })
     }
 
 
