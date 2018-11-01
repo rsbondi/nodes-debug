@@ -164,7 +164,7 @@ export default {
       this.registerMe()
     },
     sizeMe(self) {
-      self.$el.style.height = window.innerHeight - 148 + "px";
+      self.$el.style.height = window.innerHeight - 149 + "px";
       if (this.page == "console" && this.commandEditor)
         this.commandEditor.layout();
       if (this.page == "console" && this.resultEditor)

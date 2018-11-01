@@ -6,7 +6,7 @@
         <el-table :data="peers" 
                   highlight-current-row
                   :default-sort = "{prop: 'id', order: 'ascending'}"
-                  height="100%">
+                  >
           <el-table-column type="expand">
             <template slot-scope="props">
               <div>

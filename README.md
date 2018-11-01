@@ -2,7 +2,7 @@
 
 ## Description
 
-This is intended to be a general purpose tool to aid in the development of bitcoin or other similar applications(currently only bitcoin supported).
+This is intended to be a general purpose tool to aid in the development of bitcoin or other similar applications(currently only bitcoin core and btcd supported).
 
 It provides a way to interact with multiple rpc nodes.  
 
@@ -15,6 +15,10 @@ The project is designed such that multiple node types can be added in the future
 ``` bash
 # install dependencies
 npm install
+
+# build node types
+# FROM .nodetypes DIRECTORY
+node index.js
 
 # serve with hot reload at localhost:9080
 npm run dev
@@ -42,11 +46,11 @@ To add a node to the current configuration, click the + icon to the upper right 
 
 All parameters are optional, defaults will be used, **Name** is recommended as it appears in the tab, also **port**(or **config** if `rpcport` is set there) since the default is mainnet
 
-* **Node Type**: The type of the node *(currently only bitcoin is supported)*
+* **Node Type**: The type of the node (bitcoin/btcd/third party)
 * **Name**: What you want to call it, this will appear it it's tab
 * **Host**: Node's IP address
 * **Port**: The RPC port of the node
-* **Config**: Path to configuration file, this is where the node's RPC authentication information is located in format of standard `bitcoin.conf`
+* **Config**: Path to configuration file, this is where the node's RPC authentication information is located in format of standard `bitcoin.conf`(or btcd.conf or format of third party's choosing)
 
 After one or more nodes are added, you can save the configuration by selecting form the menu `Config -> Save`
 
@@ -93,8 +97,19 @@ addmultisigaddress 2
     "key2"
 ]
 ```
+
+### Features example, light theme
+
 ![bob and alice](image/alice_pay_bob.gif)
 Commands are executed by pressing F5, pressing the codelens helper or from the context menu.
+
+### Notification dark theme (BTCD)
+
+![dialog](image/notify.gif)
+
+# Development
+
+This utility supports multiple node types.  It ships with `bitcoin`(bitcoin core) and `btcd`.  The node types are defined in the `.nodetypes` directory.  To create a node of a different type, follow the example in the `bitcoin` directory.  The `${your_node_type}Controller.js` file needs to implement the methods that do not begin with an underscore.  For questions please contact me directly.
 
 # Disclaimer
 This is meant as a development tool and suggested to use on testnet or regtest, use on mainnet at your own risk.
