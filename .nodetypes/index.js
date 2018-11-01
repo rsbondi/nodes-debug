@@ -2,12 +2,13 @@ const compiler = require('vueify').compiler
 const fs = require('fs')
 const path = require('path')
 process.env.NODE_ENV = 'production'
+const types = process.argv.slice(2)
 
 const src = path.resolve('./src')
 if(!fs.existsSync( path.join(path.resolve('../dist', 'build_nodetypes'))))
     fs.mkdirSync(path.join(path.resolve('../dist'), 'build_nodetypes'))
 const out = path.resolve('../dist/build_nodetypes')
-const nodetypes = fs.readdirSync(src)
+const nodetypes = types.length && types || fs.readdirSync(src)
 nodetypes.forEach(t => {
   const files = fs.readdirSync(path.join(src, t))
   if(!fs.existsSync(path.join(out, t)))

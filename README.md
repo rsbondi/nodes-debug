@@ -16,8 +16,12 @@ The project is designed such that multiple node types can be added in the future
 # install dependencies
 npm install
 
-# build node types
+# compile all node types
 npm run compile
+
+# optionally compile selective nodetypes
+# npm run compile -- [list of node types space separated]
+# ex. npm run compile -- btcd lightning
 
 # serve with hot reload at localhost:9080
 npm run dev
