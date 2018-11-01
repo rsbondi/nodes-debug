@@ -124,14 +124,16 @@ class BitcoinController {
     }
 
     _createConsole() {
-        this.constructor.models[this.constructor.getIndex()] = {
+        this.constructor.models[this.id] = {
             command: monaco.editor.createModel('', this.constructor.lang),
             result:  monaco.editor.createModel('', 'javascript')
         }
     }
 
-    // interface
-
+    /**
+     * Parse the command editor and send command to service
+     * @param {monaco.Editor} ed The command editor instance to perform command
+     */
     execute(ed) {
         const val = this.constructor._getCommandBlock(ed.getModel(), ed.getPosition()).map(b => b.text).join(' ')
         const tokens = monaco.editor.tokenize(val, this.constructor.lang)[0]
@@ -171,35 +173,47 @@ class BitcoinController {
             });
     
           } catch (err) {
-            this.constructor.appendToEditor(`${err}\n\n`)
+            this.constructor._appendToEditor(`${err}\n\n`)
             return
           }
         }
         this._postRPC({ method: method, params: params }).then(response => {
           let content = '// '+method+' '+params.map(p => JSON.stringify(p)).join(' ') + '\n'
           content += JSON.stringify(response.data || response.error, null, 2) + '\n\n'
-          this.constructor.appendToEditor(content)
+          this.constructor._appendToEditor(content)
         }).catch(err => console.log)
         return null;
     }
 
+    /**
+     * check to see if node is still online
+     * @returns {Promise<object>} what the promise resolves to is very important
+     */
     ping() { return this._postRPC({method: 'ping'})}
 
+    /**
+     * Gets the models for the command and result editor
+     * @returns {Promise<object<monaco.model, monaco.model>>} an object containing both models {command: model, result: model}
+     */
     getConsole() {
         return new Promise((resolve, reject) => {
-            if(!this.constructor.models[this.constructor.getIndex()]) this._createConsole()
-            resolve(this.constructor.models[this.constructor.getIndex()])
+            if(!this.constructor.models[this.id]) this._createConsole()
+            resolve(this.constructor.models[this.id])
         })
     }
 
+    /**
+     * returns required information for the info tab
+     * @returns {Promise<object>} an object that matches the info tab componet requirements
+     */
     getInfo() {
         return this._interval()
     }
 
-    getNetwork() {
-        // console.log('get bitcoin network')
-    }
-
+    /**
+     * returns required information for the peers tab
+     * @returns {Promise<object>} an object that matches the peers tab componet requirements
+     */
     getPeers() {
         return new Promise((resolve, reject) => {
             Promise.all(
@@ -211,10 +225,15 @@ class BitcoinController {
         })
     }
 
+    /**
+     * instantiates or refreshes values for an instance
+     * @param {object} cfg information needed to instantiate instance
+     */
     update(cfg) {
         this._host = cfg && cfg.host || '127.0.0.1'
         this._info = {}
         this._infoTime = 0
+        this.id = cfg.index
         const config = fs.readFileSync(cfg && cfg.config.replace('~', os.homedir()) || `${os.homedir()}/.bitcoin/bitcoin.conf`, 'utf8');
         let rpcport
         config.split('\n').forEach(line => {
@@ -245,10 +264,6 @@ class BitcoinController {
         })
     }
 
-    static getIndex()  {
-        return this._store.state.Nodes.currentIndex
-    }
-
     static _getCommandBlock (model, position) {
         let line = position.lineNumber, wordAtPos, word = ''
         let block = model.getLineContent(line) ? [] : [{text:''}] // keep block alive on enter
@@ -277,7 +292,7 @@ class BitcoinController {
         return block
     }
 
-    static appendToEditor (text)  {
+    static _appendToEditor (text)  {
         const lineCount = this.resultEditor.getModel().getLineCount();
         const lastLineLength = this.resultEditor.getModel().getLineMaxColumn(lineCount);
     
@@ -293,6 +308,12 @@ class BitcoinController {
                 
     }
 
+    /**
+     * This is called only once for each node type and sets up static level data for the type
+     * @param {monaco.editor} editor the command editor
+     * @param {monaco.editor} resultEditor the result editor
+     * @param {vuex.store} store the state of the application
+     */
     static register(editor, resultEditor, store) {
         return new Promise((resolve, reject) => {
             monaco.languages.register({ id: this.lang })
