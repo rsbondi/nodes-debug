@@ -67,6 +67,23 @@ class BtcdController extends BitcoinController{
         })
 
     }
+
+    handleNotification (text)  {
+        const model = this.constructor.models[this.id]
+        if(!model) return
+        const lineCount = model.result.getLineCount();
+        const lastLineLength = model.result.getLineMaxColumn(lineCount);
+    
+        const range = new monaco.Range(lineCount, lastLineLength, lineCount, lastLineLength);
+    
+        model.result.applyEdits([
+        { range: range, text: "/* NOTIFICATION */\n"+text }
+        ])
+        model.result.modifyPosition({ lineNumber: model.result.getLineCount(), column: 0 })
+                
+    }
+
+
     update(cfg) {
         fs = require('fs')
         const os = require('os')
@@ -74,6 +91,7 @@ class BtcdController extends BitcoinController{
         this._info = {}
         this._infoTime = 0
         this._notls = 0
+        this.id = cfg.index
         const config = fs.readFileSync(cfg && cfg.config.replace('~', os.homedir()) || `${os.homedir()}/.btcd/btcd.conf`, 'utf8');
         let rpcport
         config.split('\n').forEach(line => {
@@ -116,9 +134,11 @@ class BtcdController extends BitcoinController{
             ws.on('message', (data, flags) => {
                 const obj = JSON.parse(data)
                 const key = obj.id
-               if(self.wspromises && self.wspromises[key]) {
-                _resolve(key, obj)
-               }
+                if(self.wspromises && self.wspromises[key]) {
+                    _resolve(key, obj)
+                } else if(self.constructor.resultEditor) {
+                    self.handleNotification(JSON.stringify(JSON.parse(data), null, 2)+"\n\n")
+                }
             });
             ws.on('error', (derp) => {
               console.log('ERROR:' + derp);
