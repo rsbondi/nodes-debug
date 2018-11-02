@@ -108,47 +108,52 @@ class BtcdController extends BitcoinController{
 
         if(!this._notls) {
             var fs = require('fs');
-            var WebSocket = require('ws');
-            
             var cert = fs.readFileSync(`${os.homedir()}/.btcd/rpc.cert`);
-            
-            const ws = new WebSocket(`wss://${this._host}:${this._port}/ws`, {
-              headers: {
-                'Authorization': 'Basic '+new Buffer.from(`${this._user}:${this._password}`).toString('base64')
-              },
-              cert: cert,
-              ca: [cert]
-            });
-            ws.on('open', () => {
-                if(!BtcdController.registered) {
-                    BtcdController._register()
-                    BtcdController.registered = true
-                }
-            });
-
+            var WebSocket = require('ws');
             let self = this
-            function _resolve(key, obj) {
-                self.wspromises[key].resolve({data: obj})
-                self.wspromises[key] = undefined
-            }
-            ws.on('message', (data, flags) => {
-                const obj = JSON.parse(data)
-                const key = obj.id
-                if(self.wspromises && self.wspromises[key]) {
-                    _resolve(key, obj)
-                } else if(self.constructor.resultEditor) {
-                    self._handleNotification(JSON.stringify(JSON.parse(data), null, 2)+"\n\n")
+
+            function setupWebsocket() {
+
+                const ws = new WebSocket(`wss://${self._host}:${self._port}/ws`, {
+                  headers: {
+                    'Authorization': 'Basic '+new Buffer.from(`${self._user}:${self._password}`).toString('base64')
+                  },
+                  cert: cert,
+                  ca: [cert]
+                });
+                ws.on('open', () => {
+                    if(!BtcdController.registered) {
+                        BtcdController._register()
+                        BtcdController.registered = true
+                    }
+                });
+    
+                function _resolve(key, obj) {
+                    self.wspromises[key].resolve({data: obj})
+                    self.wspromises[key] = undefined
                 }
-            });
-            ws.on('error', (derp) => {
-              console.log('ERROR:' + derp);
-            })
-            ws.on('close', (data) => {
-              console.log('DISCONNECTED');
-            })    
+                ws.on('message', (data, flags) => {
+                    const obj = JSON.parse(data)
+                    const key = obj.id
+                    if(self.wspromises && self.wspromises[key]) {
+                        _resolve(key, obj)
+                    } else if(self.constructor.resultEditor) {
+                        self._handleNotification(JSON.stringify(JSON.parse(data), null, 2)+"\n\n")
+                    }
+                });
+                ws.on('error', (derp) => {
+                  console.log('ERROR:' + derp);
+                })
+                ws.on('close', (data) => {
+                  console.log('DISCONNECTED');
+                  setTimeout(setupWebsocket, 5000)
+                })    
+                
+                self._ws = ws
+                self.wspromises = {}
+            }
             
-            this._ws = ws
-            this.wspromises = {}
+            setupWebsocket()
         }
 
     }
@@ -164,11 +169,20 @@ class BtcdController extends BitcoinController{
                 payload.id = payload.method
                 self._ws.send(JSON.stringify(payload))
                 self.wspromises[payload.method] = {resolve: resolve, reject: reject}
+                setTimeout(() => {
+                    if(self.wspromises[payload.method]) {
+                        self.wspromises[payload.method].reject('CONNECTION ERROR')
+                        self.wspromises[payload.method] = undefined
+                        self.online = false
+                    }
+                }, 5000)
             }
 
             let promise = new Promise(promiseFunction)        
-            .then(d => { this.online = true; return d}).catch(e => {
-                this.online = false
+            .then(d => { this.online = true; return d})
+            .catch(e => {
+                self.online = false
+                self.wspromises[payload.method] = undefined
                 return e.response
             })
     

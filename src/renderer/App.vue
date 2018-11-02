@@ -168,6 +168,7 @@ export default {
             await this._commitNewNode({ index: n.index, node: n });
           });
           this.$message('config loaded')
+          this.resetInterval()
           if (cb) cb();
         } catch (e) {
           console.log("caught", e);
