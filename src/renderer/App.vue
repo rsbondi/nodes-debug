@@ -79,7 +79,7 @@ import { empties } from "./misc";
 function requireFromPath(dir, mod) {
   const modpath = path.join(dir,mod)
   const modString = fs.readFileSync(modpath, 'utf8')
-  return requireString(modString, modpath)
+  return requireString(modString, modpath, {appendPath: path.join(dir, 'node_modules')})
 }
 
 export default {
@@ -376,6 +376,7 @@ export default {
         const promises = [];
 
         nodetypeModules.forEach(mod => {
+          if(fs.lstatSync(path.join(dir, mod)).isDirectory() || ~['package.json', 'package-lock.json'].indexOf(mod)) return
           if (mod.slice(-13) != "Controller.js") {
             promises.push(new Promise((resolve, reject) => {
               resolve(requireFromPath(dir, mod))

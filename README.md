@@ -16,7 +16,7 @@ The project is designed such that multiple node types can be added in the future
 # install dependencies
 npm install
 
-# compile all node types
+# compile all node types, run once before first run and after edits to files under .nodetypes
 npm run compile
 
 # optionally compile selective nodetypes
@@ -112,7 +112,13 @@ Commands are executed by pressing F5, pressing the codelens helper or from the c
 
 # Development
 
-This utility supports multiple node types.  It ships with `bitcoin`(bitcoin core) and `btcd`.  The node types are defined in the `.nodetypes` directory.  To create a node of a different type, follow the example in the `bitcoin` directory.  The `${your_node_type}Controller.js` file needs to implement the methods that do not begin with an underscore.  For questions please contact me directly.
+This utility supports multiple node types.  It ships with `bitcoin`(bitcoin core) and `btcd`.  The node types are defined in the `.nodetypes` directory.  To create a node of a different type, follow the example in the `bitcoin` directory.  The `${your_node_type}Controller.js` file needs to implement the methods that do not begin with an underscore.  For questions feel free contact me directly.
+
+Also, if your module uses external packages that are not in the root `package.json` file of this repository, you will need to include your own `package.json` file, you only need to include packages that are not already covered in the root file.  See `.nodetypes/src/btcd/package.json` as an example, which uses `ws` package.
+
+Probably a good module development strategy would be to fork this repository, create your own branch and build and test there.  When satisfied, you can release just the source and the build to your own repo.  
+
+So for example, if you want to create for ethereum, add the `ethereum` directory to the `.nodetypes/src` directory of the branch on your fork.  Add files for the console and peers, allong with the controller file. So the directory should look something like `EthereumController.js`, `EthereumInfo.vue` and `EthereumPeers.vue`.  The controller must end in Controller.js, for the others the naming is not important but best to stick to the convention.  The info and peers files are flexible as to how you want to display the data, just so it coordinates with the controller.
 
 # Disclaimer
 This is meant as a development tool and suggested to use on testnet or regtest, use on mainnet at your own risk.

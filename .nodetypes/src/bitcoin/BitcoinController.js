@@ -4,6 +4,13 @@ const os = require('os')
 
 class BitcoinController {
 
+    /**
+     * Initialize instance with configuration
+     * @param {object} cfg 
+     * @property {string} cfg.host RPC host address, default 127.0.0.1
+     * @property {number} cfg.port RPC port number, default 8332
+     * @property {string} cfg.config Path to config file with user credential, may also constain port and host, default $HOME/.bitcoin/bitcoin.conf
+     */
     constructor(cfg) {
         this.update(cfg)
     }
@@ -227,7 +234,7 @@ class BitcoinController {
 
     /**
      * instantiates or refreshes values for an instance
-     * @param {object} cfg information needed to instantiate instance
+     * @param {object} cfg information needed to instantiate instance, see constructor
      */
     update(cfg) {
         this._host = cfg && cfg.host || '127.0.0.1'

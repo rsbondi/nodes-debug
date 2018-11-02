@@ -68,7 +68,7 @@ class BtcdController extends BitcoinController{
 
     }
 
-    handleNotification (text)  {
+    _handleNotification (text)  {
         const model = this.constructor.models[this.id]
         if(!model) return
         const lineCount = model.result.getLineCount();
@@ -79,7 +79,7 @@ class BtcdController extends BitcoinController{
         model.result.pushEditOperations([new monaco.Selection(1, 1, 1, 1)],
                         [{ range: range, text: "/* NOTIFICATION */\n"+text }],
                         () => [new monaco.Selection(model.result.getLineCount(),0,model.result.getLineCount(),0)])
-        if(this.constructor.getIndex() == this.id)
+        if(this.constructor._store.state.Nodes.currentIndex == this.id)
             this.constructor.resultEditor.revealPosition({ lineNumber: this.constructor.resultEditor.getModel().getLineCount(), column: 0 })
     }
 
@@ -137,7 +137,7 @@ class BtcdController extends BitcoinController{
                 if(self.wspromises && self.wspromises[key]) {
                     _resolve(key, obj)
                 } else if(self.constructor.resultEditor) {
-                    self.handleNotification(JSON.stringify(JSON.parse(data), null, 2)+"\n\n")
+                    self._handleNotification(JSON.stringify(JSON.parse(data), null, 2)+"\n\n")
                 }
             });
             ws.on('error', (derp) => {
