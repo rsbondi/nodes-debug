@@ -6,7 +6,9 @@ const types = process.argv.slice(2)
 const child_process = require('child_process');
 
 const src = path.resolve('./src')
-if (!fs.existsSync(path.join(path.resolve('../dist', 'build_nodetypes'))))
+if (!fs.existsSync(path.resolve('../dist')))
+  fs.mkdirSync(path.resolve('../dist'))
+if (!fs.existsSync(path.join(path.resolve('../dist'), 'build_nodetypes')))
   fs.mkdirSync(path.join(path.resolve('../dist'), 'build_nodetypes'))
 const out = path.resolve('../dist/build_nodetypes')
 const nodetypes = types.length && types || fs.readdirSync(src)
