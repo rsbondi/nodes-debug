@@ -1,6 +1,6 @@
 const { BitcoinController } = require('../bitcoin/BitcoinController')
 
-class BtcdController extends BitcoinController{
+class BtcdController extends BitcoinController {
     static register(editor, resultEditor, store) {
         if(window.controllerInstances[store.state.Nodes.currentIndex]._notls) 
             return super.register(editor, resultEditor, store)
@@ -10,6 +10,7 @@ class BtcdController extends BitcoinController{
                 resolve: resolve, reject: reject, editor: editor, resultEditor: resultEditor, store: store}
         })
     }
+
     static _register() {
         const inf = BtcdController.registerInfo
         if(!inf) return
@@ -17,6 +18,7 @@ class BtcdController extends BitcoinController{
             inf.resolve()
         })
     }
+
     _interval() {
         const self = this
         return new Promise((resolve, reject) => {
@@ -38,6 +40,7 @@ class BtcdController extends BitcoinController{
             doInterval()
         })
     }
+
     getPeers() {
         return new Promise((resolve, reject) => {
             Promise.all(
@@ -48,7 +51,6 @@ class BtcdController extends BitcoinController{
                 .catch(reject)
         })
     }
-
 
     _getNetInfo() {
         const self = this
@@ -82,7 +84,6 @@ class BtcdController extends BitcoinController{
         if(this.constructor._store.state.Nodes.currentIndex == this.id)
             this.constructor.resultEditor.revealPosition({ lineNumber: this.constructor.resultEditor.getModel().getLineCount(), column: 0 })
     }
-
 
     update(cfg) {
         fs = require('fs')
@@ -189,8 +190,6 @@ class BtcdController extends BitcoinController{
             return promise
         }
     }
-
-
 }
 
 BtcdController.lang = 'btcd-rpc'

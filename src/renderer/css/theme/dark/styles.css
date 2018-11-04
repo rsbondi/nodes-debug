@@ -19,7 +19,7 @@ body, .el-tabs__nav-wrap::after, .el-table__body-wrapper,.el-table th,
 .el-tabs__nav-wrap::after, .el-table::before { background-color: #888; }
 
 .el-table__body tr.current-row>td, .el-table__expanded-cell, 
-.el-table__row:hover>td {
+.el-table__body .el-table__row:hover>td {
     background-color: #383838;
 }
 
@@ -30,4 +30,14 @@ body, .el-tabs__nav-wrap::after, .el-table__body-wrapper,.el-table th,
 .el-table td, .el-table th.is-leaf { 
     border-bottom: 1px solid #888; 
 }
+
+.el-table__body tr.hover-row.current-row>td,
+.el-table__body tr.hover-row.el-table__row--striped.current-row>td,
+.el-table__body tr.hover-row.el-table__row--striped>td,
+.el-table__body tr.hover-row>td {
+    background-color: #383838;
+    background: #383838;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover>td{background-color:#585858}
 
