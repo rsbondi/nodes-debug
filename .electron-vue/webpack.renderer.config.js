@@ -26,7 +26,8 @@ let rendererConfig = {
     renderer: path.join(__dirname, '../src/renderer/main.js')
   },
   externals: [
-    ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d))
+    ...Object.keys(dependencies || {}).filter(d => !whiteListedModules.includes(d)),
+    /^dist\/build_nodetypes\/.+\.js/
   ],
   module: {
     rules: [
@@ -44,7 +45,7 @@ let rendererConfig = {
       {
         test: /\.js$/,
         use: 'babel-loader',
-        exclude: /node_modules/
+        exclude: [/node_modules/,/build_nodetypes/],
       },
       {
         test: /\.node$/,
@@ -151,19 +152,13 @@ if (process.env.NODE_ENV === 'production') {
 
   rendererConfig.plugins.push(
     new BabiliWebpackPlugin(),
-    new CopyWebpackPlugin([
-      {
-        from: path.join(__dirname, '../src/renderer/components/nodetypes'),
-        to: path.join(__dirname, '../dist/electron/components/nodetypes'),
-        ignore: ['.*']
-      }
-    ]),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"production"'
     }),
     new webpack.LoaderOptionsPlugin({
       minimize: true
-    })
+    }),
+   // new webpack.IgnorePlugin(/build_nodetypes/)
   )
 }
 

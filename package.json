@@ -11,10 +11,11 @@
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",
-    "build:pkg": "node .electron-vue/build.js && electron-packager .",
+    "build:pkg": "node .electron-vue/build.js && electron-packager --out=build --asar=0 --overwrite=true .",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
+    "compile": "cd .nodetypes && node index.js",
     "dev": "node .electron-vue/dev-runner.js",
     "e2e": "mocha test/e2e",
     "pack": "npm run pack:main && npm run pack:renderer",
@@ -61,10 +62,11 @@
   "dependencies": {
     "axios": "^0.16.1",
     "element-ui": "^2.2.1",
-    "vue-monaco": "^0.1.6",
     "monaco-editor": "^0.10.1",
+    "require-from-string": "^2.0.2",
     "vue": "^2.3.3",
     "vue-electron": "^1.0.6",
+    "vue-monaco": "^0.1.6",
     "vuex": "^2.3.1"
   },
   "devDependencies": {
@@ -73,6 +75,7 @@
     "babel-plugin-istanbul": "^4.1.1",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.0",
+    "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.24.1",
     "babili-webpack-plugin": "^0.1.2",
@@ -111,6 +114,7 @@
     "vue-loader": "^13.0.5",
     "vue-style-loader": "^3.0.1",
     "vue-template-compiler": "^2.4.2",
+    "vueify": "^9.4.1",
     "webpack": "^3.5.2",
     "webpack-dev-server": "^2.7.1",
     "webpack-hot-middleware": "^2.18.2",

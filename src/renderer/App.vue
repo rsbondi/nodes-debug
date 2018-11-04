@@ -66,6 +66,7 @@ const { Menu, MenuItem, dialog } = remote;
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
+const requireString = require('require-from-string')
 import { MenuHandler } from "./menu";
 import Empty from "./components/Empty";
 import InfoView from "./components/Info";
@@ -75,12 +76,10 @@ import ConsoleView from "./components/Console";
 let infoInterval;
 import { empties } from "./misc";
 
-const styles = {
-  foreground: ["body", ".el-tabs__item",".el-table th", ".el-table tr", ".el-form-item__label", ".el-dialog__title", ".el-input__inner"],
-  background: ["body", ".el-tabs__nav-wrap::after", ".el-table__body-wrapper",".el-table th", ".el-table tr", ".el-dialog", ".el-input__inner"],
-  trim: [".el-tabs--card>.el-tabs__header .el-tabs__nav", ".el-tabs--card>.el-tabs__header .el-tabs__item.is-active",
-         ".el-tabs--card>.el-tabs__header .el-tabs__item", ".el-tabs--card>.el-tabs__header", ".editor",
-         ".el-tabs__new-tab", ".el-input__inner"] // #e4e7ed #888
+function requireFromPath(dir, mod) {
+  const modpath = path.join(dir,mod)
+  const modString = fs.readFileSync(modpath, 'utf8')
+  return requireString(modString, modpath, {appendPath: path.join(dir, 'node_modules')})
 }
 
 export default {
@@ -169,6 +168,7 @@ export default {
             await this._commitNewNode({ index: n.index, node: n });
           });
           this.$message('config loaded')
+          this.resetInterval()
           if (cb) cb();
         } catch (e) {
           console.log("caught", e);
@@ -196,28 +196,19 @@ export default {
       });
     },
     handleTheme(t) {
-      let editorTheme, foreground, background, trim
-      if(t=='dark') 
-        [editorTheme, foreground, background, trim] = ['vs-dark', '#ccc', '#383838', '#888']
-      else
-        [editorTheme, foreground, background, trim] = ['vs-light', '#000', '#fff', '#e4e7ed']
-        monaco.editor.setTheme(editorTheme)
-        let stylestr = `
-${styles.foreground.join(', ')} {color: ${foreground};} 
-${styles.background.join(', ')} {background: ${background};} 
-${styles.trim.join(', ')} {border-color: ${trim};} 
-.el-tabs__nav-wrap::after, .el-table::before {background-color: ${trim};}
-.el-table__body tr.current-row>td, .el-table__expanded-cell, .el-table__row:hover>td {background-color: ${background};}
-.el-tabs--card>.el-tabs__header .el-tabs__item.is-active {border-bottom-color: ${background};}
-.el-table td, .el-table th.is-leaf {border-bottom: 1px solid ${trim};}
-`
+      const href = process.env.NODE_ENV === 'development'
+                    ? `file:///${path.resolve(__dirname)}/css/theme/${t}/styles.css`
+                    : `file:///${path.resolve(__dirname)}/../../src/renderer/css/theme/${t}/styles.css`
         let styleElement = document.head.querySelector('#themestyle')
         if(!styleElement) {
-          styleElement = document.createElement('style')
+          styleElement = document.createElement('link')
+          styleElement.rel = "stylesheet"
+          styleElement.type = "text/css"
           styleElement.id = 'themestyle'
           document.head.appendChild(styleElement)
         }
-        styleElement.innerHTML = stylestr
+        styleElement.href = href
+        monaco.editor.setTheme(`vs-${t}`)
         this.theme = t
     },
     handleMenu(e) {
@@ -304,7 +295,7 @@ ${styles.trim.join(', ')} {border-color: ${trim};}
     },
     saveNode() {
       this.$store.commit("node_update_controller", this.formnode);
-      const controller = this.$store.state.Nodes.controllerInstances[
+      const controller = window.controllerInstances[
         this.formnode.index
       ];
       controller.update(this.formnode);
@@ -345,7 +336,7 @@ ${styles.trim.join(', ')} {border-color: ${trim};}
       return new Promise((resolve, reject) => {
         if (~this.$store.state.Nodes.loadedTypes.indexOf(currentNode.type)) {
           // already have type, check if model is current
-          if (!~Object.keys(this.$store.state.Nodes.controllerInstances).indexOf(currentNode.index)) {
+          if (!~Object.keys(window.controllerInstances).indexOf(currentNode.index)) {
             const controller = new this.$store.state.Nodes.controllers[
               currentNode.type
             ](currentNode);
@@ -373,14 +364,9 @@ ${styles.trim.join(', ')} {border-color: ${trim};}
           resolve();
           return;
         }
-
-        // new type, load from filesystem
-        const dir = path.join(
-          __dirname,
-          "components",
-          "nodetypes",
-          currentNode.type
-        );
+        
+        // TODO: PATH - join and check env
+        const dir = path.resolve(`${__dirname}/../../dist/build_nodetypes/${currentNode.type}`)
         let nodetypeModules;
         try {
           nodetypeModules = fs.readdirSync(dir);
@@ -389,16 +375,21 @@ ${styles.trim.join(', ')} {border-color: ${trim};}
           return
         }
         const promises = [];
+
         nodetypeModules.forEach(mod => {
-          if (mod.slice(-4) == ".vue")
-            promises.push(
-              import(`./components/nodetypes/${currentNode.type}/${mod}`)
-            );
-          else {
-            import(`./components/nodetypes/${currentNode.type}/${mod}`)
+          if(fs.lstatSync(path.join(dir, mod)).isDirectory() || ~['package.json', 'package-lock.json'].indexOf(mod)) return
+          if (mod.slice(-13) != "Controller.js") {
+            promises.push(new Promise((resolve, reject) => {
+              resolve(requireFromPath(dir, mod))
+            }))
+
+          } else {
+            (new Promise((resolve, reject) => {
+              resolve(requireFromPath(dir, mod))
+            }))
               .then(c => {
-                this.$store.commit("node_controller_type_loaded", c.default);
-                const controller = new c.default.controller(currentNode);
+                this.$store.commit("node_controller_type_loaded", c);
+                const controller = new c.controller(currentNode);
                 this.$store.commit("node_set_index", currentNode.index);
                 this.$store.commit("node_instantiate_controller", {
                   index: currentNode.index,
@@ -407,13 +398,14 @@ ${styles.trim.join(', ')} {border-color: ${trim};}
                 });
                 this.callService();
               })
-              .catch(e => {console.log(e); resolve()});
+            .catch(e => {console.log(e); resolve()});
           }
         });
         Promise.all(promises)
           .then(comps => {
-            comps.forEach(comp =>
-              Vue.component(comp.default.name, comp.default)
+            comps.forEach(comp => {
+              Vue.component(comp.name, comp)
+            }
             );
             this.$store.commit("node_type_loaded", currentNode.type);
             resolve();
@@ -428,7 +420,7 @@ ${styles.trim.join(', ')} {border-color: ${trim};}
         `get${this.activePage.slice(0, 1).toUpperCase()}${this.activePage.slice(
           1
         )}`;
-      const controller = this.$store.state.Nodes.controllerInstances[this.$store.state.Nodes.currentIndex]
+      const controller = window.controllerInstances[this.$store.state.Nodes.currentIndex]
       return controller[service]()
         .then(info => {
           this.controllerOnline = controller.online
@@ -476,18 +468,10 @@ ${styles.trim.join(', ')} {border-color: ${trim};}
     const path = require("path");
 
     try {
-      const dir = path.join(__dirname, "components", "nodetypes");
+      const dir = path.resolve(`${__dirname}/../../dist/build_nodetypes`) // TODO: PATH - join and check env
 
       const nodetypes = fs.readdirSync(dir);
       nodetypes.forEach(n => this.nodeTypes.push({ index: `${n}`, name: n }));
-
-      /* sample to load user nodetypes
-        const dummy = fs.readFileSync('/home/richard/projects/zPlay/nodes-debug/dist/Console.js', 'utf8')
-        const script = document.createElement('script')
-        script.textContent = dummy
-        document.body.appendChild(script)
-        Vue.component(ConsoleComponent.name, ConsoleComponent)
-*/
     } catch (e) {
       alert(e);
     }

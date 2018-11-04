@@ -1,4 +1,12 @@
 import Vue from 'vue'
+window.controllerInstances = {
+  0: {  // dummy contoller
+    getInfo: () => new Promise(resolve => resolve({})),
+    info: {},
+    getPeers: () => new Promise(resolve => resolve([])),
+    peers: {}
+  } 
+}
 
 const state = {
   currentType: 'bitcoin',
@@ -7,14 +15,6 @@ const state = {
   instantiatedTypes: [],
   registeredTypes: [],
   controllers: {},
-  controllerInstances: {
-    0: {  // dummy contoller
-      getInfo: () => new Promise(resolve => resolve({})),
-      info: {},
-      getPeers: () => new Promise(resolve => resolve([])),
-      peers: {}
-    } 
-  },
   nodes: {},
   currentInfo: {},
   currentPeers: {},
@@ -38,8 +38,8 @@ const mutations = {
   },
   node_type_changed (state, type) { state.currentType = type },
   node_instantiate_controller (state, instanceInfo) {
-    if(!state.controllerInstances[instanceInfo.index]) {
-      state.controllerInstances[instanceInfo.index] = instanceInfo.controller
+    if(!window.controllerInstances[instanceInfo.index]) {
+      window.controllerInstances[instanceInfo.index] = instanceInfo.controller
       this.commit('node_controller_type_instantiated', instanceInfo.type)
     }
   },

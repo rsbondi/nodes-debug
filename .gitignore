@@ -1,5 +1,6 @@
 .DS_Store
 dist/electron/*
+dist/build_nodetypes/*
 dist/web/*
 build/*
 !build/icons
@@ -9,3 +10,4 @@ npm-debug.log
 npm-debug.log.*
 thumbs.db
 !.gitkeep
+.vscode/settings.json

@@ -4,6 +4,13 @@ const os = require('os')
 
 class BitcoinController {
 
+    /**
+     * Initialize instance with configuration
+     * @param {object} cfg 
+     * @property {string} cfg.host RPC host address, default 127.0.0.1
+     * @property {number} cfg.port RPC port number, default 8332
+     * @property {string} cfg.config Path to config file with user credential, may also constain port and host, default $HOME/.bitcoin/bitcoin.conf
+     */
     constructor(cfg) {
         this.update(cfg)
     }
@@ -124,14 +131,16 @@ class BitcoinController {
     }
 
     _createConsole() {
-        this.constructor.models[this.constructor.getIndex()] = {
+        this.constructor.models[this.id] = {
             command: monaco.editor.createModel('', this.constructor.lang),
             result:  monaco.editor.createModel('', 'javascript')
         }
     }
 
-    // interface
-
+    /**
+     * Parse the command editor and send command to service
+     * @param {monaco.Editor} ed The command editor instance to perform command
+     */
     execute(ed) {
         const val = this.constructor._getCommandBlock(ed.getModel(), ed.getPosition()).map(b => b.text).join(' ')
         const tokens = monaco.editor.tokenize(val, this.constructor.lang)[0]
@@ -171,35 +180,47 @@ class BitcoinController {
             });
     
           } catch (err) {
-            this.constructor.appendToEditor(`${err}\n\n`)
+            this.constructor._appendToEditor(`${err}\n\n`)
             return
           }
         }
         this._postRPC({ method: method, params: params }).then(response => {
           let content = '// '+method+' '+params.map(p => JSON.stringify(p)).join(' ') + '\n'
           content += JSON.stringify(response.data || response.error, null, 2) + '\n\n'
-          this.constructor.appendToEditor(content)
+          this.constructor._appendToEditor(content)
         }).catch(err => console.log)
         return null;
     }
 
+    /**
+     * check to see if node is still online
+     * @returns {Promise<object>} what the promise resolves to is very important
+     */
     ping() { return this._postRPC({method: 'ping'})}
 
+    /**
+     * Gets the models for the command and result editor
+     * @returns {Promise<object<monaco.model, monaco.model>>} an object containing both models {command: model, result: model}
+     */
     getConsole() {
         return new Promise((resolve, reject) => {
-            if(!this.constructor.models[this.constructor.getIndex()]) this._createConsole()
-            resolve(this.constructor.models[this.constructor.getIndex()])
+            if(!this.constructor.models[this.id]) this._createConsole()
+            resolve(this.constructor.models[this.id])
         })
     }
 
+    /**
+     * returns required information for the info tab
+     * @returns {Promise<object>} an object that matches the info tab componet requirements
+     */
     getInfo() {
         return this._interval()
     }
 
-    getNetwork() {
-        // console.log('get bitcoin network')
-    }
-
+    /**
+     * returns required information for the peers tab
+     * @returns {Promise<object>} an object that matches the peers tab componet requirements
+     */
     getPeers() {
         return new Promise((resolve, reject) => {
             Promise.all(
@@ -211,10 +232,15 @@ class BitcoinController {
         })
     }
 
+    /**
+     * instantiates or refreshes values for an instance
+     * @param {object} cfg information needed to instantiate instance, see constructor
+     */
     update(cfg) {
         this._host = cfg && cfg.host || '127.0.0.1'
         this._info = {}
         this._infoTime = 0
+        this.id = cfg.index
         const config = fs.readFileSync(cfg && cfg.config.replace('~', os.homedir()) || `${os.homedir()}/.bitcoin/bitcoin.conf`, 'utf8');
         let rpcport
         config.split('\n').forEach(line => {
@@ -239,14 +265,10 @@ class BitcoinController {
                 resolve(this.helpContent[key])
             })
             return promise
-        } else return this._store.state.Nodes.controllerInstances[this._store.state.Nodes.currentIndex]._postRPC({ method: 'help', params: [key] }).then(resp => {
+        } else return window.controllerInstances[this._store.state.Nodes.currentIndex]._postRPC({ method: 'help', params: [key] }).then(resp => {
             this.helpContent[key] = resp
             return resp
         })
-    }
-
-    static getIndex()  {
-        return this._store.state.Nodes.currentIndex
     }
 
     static _getCommandBlock (model, position) {
@@ -277,7 +299,7 @@ class BitcoinController {
         return block
     }
 
-    static appendToEditor (text)  {
+    static _appendToEditor (text)  {
         const lineCount = this.resultEditor.getModel().getLineCount();
         const lastLineLength = this.resultEditor.getModel().getLineMaxColumn(lineCount);
     
@@ -293,6 +315,12 @@ class BitcoinController {
                 
     }
 
+    /**
+     * This is called only once for each node type and sets up static level data for the type
+     * @param {monaco.editor} editor the command editor
+     * @param {monaco.editor} resultEditor the result editor
+     * @param {vuex.store} store the state of the application
+     */
     static register(editor, resultEditor, store) {
         return new Promise((resolve, reject) => {
             monaco.languages.register({ id: this.lang })
@@ -301,7 +329,7 @@ class BitcoinController {
             this.models = {} // models mutate on every keystroke and do not play well with vuex
             this.commandEditor = editor
             this.resultEditor = resultEditor
-            store.state.Nodes.controllerInstances[store.state.Nodes.currentIndex]._getHelp().then(response => {
+            window.controllerInstances[store.state.Nodes.currentIndex]._getHelp().then(response => {
                 if(!response) { reject(); return }
                 this._helpers = response.data.result.split('\n').reduce((o, c, i) => {
                     if (c && !c.indexOf('==') == 0) {
@@ -513,7 +541,7 @@ class BitcoinController {
 }
 
 BitcoinController.lang = 'bitcoin-rpc'
-export default {
+module.exports = {
     type: 'bitcoin',
     controller: BitcoinController,
     BitcoinController: BitcoinController
