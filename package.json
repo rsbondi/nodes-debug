@@ -1,6 +1,6 @@
 {
   "name": "nodes-debug",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "author": "Richard Bondi",
   "description": "debug multiple nodes(rpc, websocket etc.) of varying types(bitcoin, others to come)",
   "license": "MIT",
@@ -10,11 +10,8 @@
   },
   "main": "./dist/electron/main.js",
   "scripts": {
-    "build": "node .electron-vue/build.js && electron-builder",
-    "build:pkg": "node .electron-vue/build.js && electron-packager --out=build --asar=0 --overwrite=true .",
-    "build:dir": "node .electron-vue/build.js && electron-builder --dir",
+    "build": "node .electron-vue/build.js && electron-packager --out=build --asar=0 --overwrite=true .",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
-    "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
     "compile": "cd .nodetypes && node index.js",
     "dev": "node .electron-vue/dev-runner.js",
     "e2e": "mocha test/e2e",
@@ -88,7 +85,6 @@
     "del": "^3.0.0",
     "devtron": "^1.4.0",
     "electron": "^1.8.8",
-    "electron-builder": "^19.19.1",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",
     "extract-text-webpack-plugin": "^3.0.0",

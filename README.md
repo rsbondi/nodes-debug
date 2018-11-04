@@ -27,11 +27,11 @@ npm run compile
 npm run dev
 
 # build electron application for production
+npm install -g electron-packager
 npm run build
 
 # run unit & end-to-end tests
 npm test
-
 
 ```
 
@@ -119,6 +119,8 @@ Also, if your module uses external packages that are not in the root `package.js
 Probably a good module development strategy would be to fork this repository, create your own branch and build and test there.  When satisfied, you can release just the source and the build to your own repo.  
 
 So for example, if you want to create for ethereum, add the `ethereum` directory to the `.nodetypes/src` directory of the branch on your fork.  Add files for the console and peers, allong with the controller file. So the directory should look something like `EthereumController.js`, `EthereumInfo.vue` and `EthereumPeers.vue`.  The controller must end in Controller.js, for the others the naming is not important but best to stick to the convention.  The info and peers files are flexible as to how you want to display the data, just so it coordinates with the controller.
+
+To add a third pary node type to an existing installation, add the subdirectory to `resources/app/dist/build_nodetypes` in the packaged app.
 
 # Disclaimer
 This is meant as a development tool and suggested to use on testnet or regtest, use on mainnet at your own risk.
