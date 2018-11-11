@@ -1,0 +1,18 @@
+{
+  "name": "nodes-debug-lnd",
+  "version": "0.0.1",
+  "description": "lnd module for nodes-debug",
+  "main": "LndController.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "lnd",
+    "grpc"
+  ],
+  "author": "Richard Bondi",
+  "license": "MIT",
+  "dependencies": {
+    "grpc": "^1.16.0"
+  }
+}
