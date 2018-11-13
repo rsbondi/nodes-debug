@@ -12,5 +12,8 @@
     "grpc"
   ],
   "author": "Richard Bondi",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@grpc/proto-loader": "^0.3.0"
+  }
 }

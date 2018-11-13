@@ -15,7 +15,7 @@ let description = ""
 let incomment = false
 
 lines.forEach(l => {
-    const rpc = l.match(/rpc ([a-zA-Z]+) \((stream )?([a-zA-Z]+)\) returns \((stream )?([a-zA-Z]+)\)/)
+    const rpc = l.match(/rpc ([a-zA-Z]+)\s?\((stream )?([a-zA-Z]+)\) returns \((stream )?([a-zA-Z]+)\)/)
     if(rpc) {
         commands[rpc[1].slice(0, 1).toLowerCase()+rpc[1].slice(1)] = {request: rpc[3], returns: rpc[5], description: description}
     }
@@ -38,7 +38,7 @@ lines.forEach(l => {
         }
     }
 
-    const msg = l.match(/message ([a-zA-Z]+) (\{\})?/)
+    const msg = l.match(/message ([a-zA-Z]+)\s?(\{\})?/)
     if(msg) {
         if(typeof msg[2]== 'undefined') inmsg = true; else inmsg = false
         currentMsg = msg[1]
@@ -60,6 +60,7 @@ Object.keys(commands).forEach(k => {
     let c = commands[k]
     c.args = messages[c.request].fields
     c.response = messages[c.returns].fields
+
     delete c.request; delete c.returns
 })
 console.log(JSON.stringify(commands, null, 2))

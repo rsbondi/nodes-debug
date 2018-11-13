@@ -1,1102 +1,1724 @@
 {
-    "changePassword": {
-      "description": "ChangePassword changes the password of the encrypted wallet. This will\nautomatically unlock the wallet database if successful.\n",
-      "args": [
-        {
-          "name": "current_password",
-          "type": "bytes",
-          "description": "current_password should be the current valid passphrase used to unlock the\ndaemon.\n"
-        },
-        {
-          "name": "new_password",
-          "type": "bytes",
-          "description": "new_password should be the new passphrase that will be needed to unlock the\ndaemon.\n"
-        }
-      ],
-      "response": []
-    },
-    "walletBalance": {
-      "description": "WalletBalance returns total unspent outputs(confirmed and unconfirmed), all\nconfirmed unspent outputs and all unconfirmed unspent outputs under control\nof the wallet. \n",
-      "args": [],
-      "response": [
-        {
-          "name": "total_balance",
-          "type": "int64",
-          "description": "The balance of the wallet"
-        },
-        {
-          "name": "confirmed_balance",
-          "type": "int64",
-          "description": "The confirmed balance of a wallet(with >= 1 confirmations)"
-        },
-        {
-          "name": "unconfirmed_balance",
-          "type": "int64",
-          "description": "The unconfirmed balance of a wallet(with 0 confirmations)"
-        }
-      ]
-    },
-    "channelBalance": {
-      "description": "ChannelBalance returns the total funds available across all open channels\nin satoshis.\n",
-      "args": [],
-      "response": [
-        {
-          "name": "balance",
-          "type": "int64",
-          "description": "Sum of channels balances denominated in satoshis"
-        },
-        {
-          "name": "pending_open_balance",
-          "type": "int64",
-          "description": "Sum of channels pending balances denominated in satoshis"
-        }
-      ]
-    },
-    "getTransactions": {
-      "description": "GetTransactions returns a list describing all the known transactions\nrelevant to the wallet.\n",
-      "args": [],
-      "response": [
-        {
-          "name": "Transaction",
-          "type": "repeated",
-          "description": "The list of transactions relevant to the wallet."
-        }
-      ]
-    },
-    "sendCoins": {
-      "description": "SendCoins executes a request to send coins to a particular address. Unlike\nSendMany, this RPC call only allows creating a single output at a time. If\nneither target_conf, or sat_per_byte are set, then the internal wallet will\nconsult its fee model to determine a fee for the default confirmation\ntarget.\n",
-      "args": [
-        {
-          "name": "addr",
-          "type": "string",
-          "description": "The address to send coins to "
-        },
-        {
-          "name": "amount",
-          "type": "int64",
-          "description": "The amount in satoshis to send"
-        },
-        {
-          "name": "target_conf",
-          "type": "int32",
-          "description": "The target number of blocks that this transaction should be confirmed by."
-        },
-        {
-          "name": "sat_per_byte",
-          "type": "int64",
-          "description": "A manual fee rate set in sat/byte that should be used when crafting the transaction."
-        }
-      ],
-      "response": [
-        {
-          "name": "txid",
-          "type": "string",
-          "description": "The transaction ID of the transaction"
-        }
-      ]
-    },
-    "sendMany": {
-      "description": "SendMany handles a request for a transaction that creates multiple specified\noutputs in parallel. If neither target_conf, or sat_per_byte are set, then\nthe internal wallet will consult its fee model to determine a fee for the\ndefault confirmation target.\n",
-      "args": [
-        {
-          "name": "target_conf",
-          "type": "int32",
-          "description": "The target number of blocks that this transaction should be confirmed by."
-        },
-        {
-          "name": "sat_per_byte",
-          "type": "int64",
-          "description": "A manual fee rate set in sat/byte that should be used when crafting the transaction."
-        }
-      ],
-      "response": [
-        {
-          "name": "txid",
-          "type": "string",
-          "description": "The id of the transaction"
-        }
-      ]
-    },
-    "newAddress": {
-      "description": "NewAddress creates a new address under control of the local wallet.\n",
-      "args": [
-        {
-          "name": "type",
-          "type": "AddressType",
-          "description": "The address type"
-        }
-      ],
-      "response": [
-        {
-          "name": "address",
-          "type": "string",
-          "description": "The newly generated wallet address"
-        }
-      ]
-    },
-    "signMessage": {
-      "description": "SignMessage signs a message with this node's private key. The returned\nsignature string is `zbase32` encoded and pubkey recoverable, meaning that\nonly the message digest and signature are needed for verification.\n",
-      "args": [],
-      "response": [
-        {
-          "name": "signature",
-          "type": "string",
-          "description": "The signature for the given message"
-        }
-      ]
-    },
-    "verifyMessage": {
-      "description": "VerifyMessage verifies a signature over a msg. The signature must be\nzbase32 encoded and signed by an active node in the resident node's\nchannel database. In addition to returning the validity of the signature,\nVerifyMessage also returns the recovered pubkey from the signature.\n",
-      "args": [],
-      "response": [
-        {
-          "name": "valid",
-          "type": "bool",
-          "description": "Whether the signature was valid over the given message"
-        },
-        {
-          "name": "pubkey",
-          "type": "string",
-          "description": "The pubkey recovered from the signature"
-        }
-      ]
-    },
-    "connectPeer": {
-      "description": "ConnectPeer attempts to establish a connection to a remote peer. This is at\nthe networking level, and is used for communication between nodes. This is\ndistinct from establishing a channel with a peer.\n",
-      "args": [
-        {
-          "name": "addr",
-          "type": "LightningAddress",
-          "description": "Lightning address of the peer, in the format `<pubkey>@host`"
-        },
-        {
-          "name": "set",
-          "type": "If",
-          "description": ""
-        },
-        {
-          "name": "call",
-          "type": "the",
-          "description": ""
-        },
-        {
-          "name": "perm",
-          "type": "bool",
-          "description": ""
-        }
-      ],
-      "response": []
-    },
-    "disconnectPeer": {
-      "description": "DisconnectPeer attempts to disconnect one peer from another identified by a\ngiven pubKey. In the case that we currently have a pending or active channel\nwith the target peer, then this action will be not be allowed.\n",
-      "args": [
-        {
-          "name": "pub_key",
-          "type": "string",
-          "description": "The pubkey of the node to disconnect from"
-        }
-      ],
-      "response": []
-    },
-    "listPeers": {
-      "description": "ListPeers returns a verbose listing of all currently active peers.\n",
-      "args": [],
-      "response": [
-        {
-          "name": "Peer",
-          "type": "repeated",
-          "description": "The list of currently connected peers"
-        }
-      ]
-    },
-    "getInfo": {
-      "description": "GetInfo returns general information concerning the lightning node including\nit's identity pubkey, alias, the chains it is connected to, and information\nconcerning the number of open+pending channels.\n",
-      "args": [],
-      "response": [
-        {
-          "name": "identity_pubkey",
-          "type": "string",
-          "description": "The identity pubkey of the current node."
-        },
-        {
-          "name": "alias",
-          "type": "string",
-          "description": "If applicable, the alias of the current node, e.g. \"bob\""
-        },
-        {
-          "name": "num_pending_channels",
-          "type": "uint32",
-          "description": "Number of pending channels"
-        },
-        {
-          "name": "num_active_channels",
-          "type": "uint32",
-          "description": "Number of active channels"
-        },
-        {
-          "name": "num_peers",
-          "type": "uint32",
-          "description": "Number of peers"
-        },
-        {
-          "name": "block_height",
-          "type": "uint32",
-          "description": "The node's current view of the height of the best block"
-        },
-        {
-          "name": "block_hash",
-          "type": "string",
-          "description": "The node's current view of the hash of the best block"
-        },
-        {
-          "name": "synced_to_chain",
-          "type": "bool",
-          "description": "Whether the wallet's view is synced to the main chain"
-        },
-        {
-          "name": "testnet",
-          "type": "bool",
-          "description": "Whether the current node is connected to testnet"
-        },
-        {
-          "name": "string",
-          "type": "repeated",
-          "description": "A list of active chains the node is connected to"
-        },
-        {
-          "name": "string",
-          "type": "repeated",
-          "description": "The URIs of the current node."
-        },
-        {
-          "name": "best_header_timestamp",
-          "type": "int64",
-          "description": "Timestamp of the block best known to the wallet"
-        },
-        {
-          "name": "version",
-          "type": "string",
-          "description": "The version of the LND software that the node is running."
-        },
-        {
-          "name": "num_inactive_channels",
-          "type": "uint32",
-          "description": "Number of inactive channels"
-        }
-      ]
-    },
-    "pendingChannels": {
-      "description": "PendingChannels returns a list of all the channels that are currently\nconsidered \"pending\". A channel is pending if it has finished the funding\nworkflow and is waiting for confirmations for the funding txn, or is in the\nprocess of closure, either initiated cooperatively or non-cooperatively.\n",
-      "args": [],
-      "response": []
-    },
-    "listChannels": {
-      "description": "ListChannels returns a description of all the open channels that this node\nis a participant in.\n",
-      "args": [
-        {
-          "name": "active_only",
-          "type": "bool",
-          "description": ""
-        },
-        {
-          "name": "inactive_only",
-          "type": "bool",
-          "description": ""
-        },
-        {
-          "name": "public_only",
-          "type": "bool",
-          "description": ""
-        },
-        {
-          "name": "private_only",
-          "type": "bool",
-          "description": ""
-        }
-      ],
-      "response": [
-        {
-          "name": "Channel",
-          "type": "repeated",
-          "description": "The list of active channels"
-        }
-      ]
-    },
-    "closedChannels": {
-      "description": "ClosedChannels returns a description of all the closed channels that \nthis node was a participant in.\n",
-      "args": [
-        {
-          "name": "cooperative",
-          "type": "bool",
-          "description": ""
-        },
-        {
-          "name": "local_force",
-          "type": "bool",
-          "description": ""
-        },
-        {
-          "name": "remote_force",
-          "type": "bool",
-          "description": ""
-        },
-        {
-          "name": "breach",
-          "type": "bool",
-          "description": ""
-        },
-        {
-          "name": "funding_canceled",
-          "type": "bool",
-          "description": ""
-        },
-        {
-          "name": "abandoned",
-          "type": "bool",
-          "description": ""
-        }
-      ],
-      "response": [
-        {
-          "name": "ChannelCloseSummary",
-          "type": "repeated",
-          "description": ""
-        }
-      ]
-    },
-    "openChannelSync": {
-      "description": "OpenChannelSync is a synchronous version of the OpenChannel RPC call. This\ncall is meant to be consumed by clients to the REST proxy. As with all\nother sync calls, all byte slices are intended to be populated as hex\nencoded strings.\n",
-      "args": [
-        {
-          "name": "node_pubkey",
-          "type": "bytes",
-          "description": "The pubkey of the node to open a channel with"
-        },
-        {
-          "name": "node_pubkey_string",
-          "type": "string",
-          "description": "The hex encoded pubkey of the node to open a channel with"
-        },
-        {
-          "name": "local_funding_amount",
-          "type": "int64",
-          "description": "The number of satoshis the wallet should commit to the channel"
-        },
-        {
-          "name": "push_sat",
-          "type": "int64",
-          "description": "The number of satoshis to push to the remote side as part of the initial commitment state"
-        },
-        {
-          "name": "target_conf",
-          "type": "int32",
-          "description": "The target number of blocks that the funding transaction should be confirmed by."
-        },
-        {
-          "name": "sat_per_byte",
-          "type": "int64",
-          "description": "A manual fee rate set in sat/byte that should be used when crafting the funding transaction."
-        },
-        {
-          "name": "private",
-          "type": "bool",
-          "description": "Whether this channel should be private, not announced to the greater network."
-        },
-        {
-          "name": "min_htlc_msat",
-          "type": "int64",
-          "description": "The minimum value in millisatoshi we will require for incoming HTLCs on the channel."
-        },
-        {
-          "name": "remote_csv_delay",
-          "type": "uint32",
-          "description": "The delay we require on the remote's commitment transaction. If this is not set, it will be scaled automatically with the channel size."
-        },
-        {
-          "name": "min_confs",
-          "type": "int32",
-          "description": "The minimum number of confirmations each one of your outputs used for the funding transaction must satisfy."
-        },
-        {
-          "name": "spend_unconfirmed",
-          "type": "bool",
-          "description": "Whether unconfirmed outputs should be used as inputs for the funding transaction."
-        }
-      ],
-      "response": [
-        {
-          "name": "funding_txid",
-          "type": "oneof",
-          "description": ""
-        },
-        {
-          "name": "funding_txid_bytes",
-          "type": "bytes",
-          "description": "Txid of the funding transaction"
-        },
-        {
-          "name": "funding_txid_str",
-          "type": "string",
-          "description": "Hex-encoded string representing the funding transaction"
-        },
-        {
-          "name": "output_index",
-          "type": "uint32",
-          "description": "The index of the output of the funding transaction"
-        }
-      ]
-    },
-    "abandonChannel": {
-      "description": "AbandonChannel removes all channel state from the database except for a\nclose summary. This method can be used to get rid of permanently unusable\nchannels due to bugs fixed in newer versions of lnd. Only available\nwhen in debug builds of lnd.\n",
-      "args": [
-        {
-          "name": "channel_point",
-          "type": "ChannelPoint",
-          "description": ""
-        }
-      ],
-      "response": []
-    },
-    "sendPaymentSync": {
-      "description": "SendPaymentSync is the synchronous non-streaming version of SendPayment.\nThis RPC is intended to be consumed by clients of the REST proxy.\nAdditionally, this RPC expects the destination's public key and the payment\nhash (if any) to be encoded as hex strings.\n",
-      "args": [
-        {
-          "name": "dest",
-          "type": "bytes",
-          "description": "The identity pubkey of the payment recipient"
-        },
-        {
-          "name": "dest_string",
-          "type": "string",
-          "description": "The hex-encoded identity pubkey of the payment recipient"
-        },
-        {
-          "name": "amt",
-          "type": "int64",
-          "description": "Number of satoshis to send."
-        },
-        {
-          "name": "payment_hash",
-          "type": "bytes",
-          "description": "The hash to use within the payment's HTLC"
-        },
-        {
-          "name": "payment_hash_string",
-          "type": "string",
-          "description": "The hex-encoded hash to use within the payment's HTLC"
-        },
-        {
-          "name": "payment_request",
-          "type": "string",
-          "description": "A bare-bones invoice for a payment within the Lightning Network.  With the\ndetails of the invoice, the sender has all the data necessary to send a\npayment to the recipient.\n"
-        },
-        {
-          "name": "final_cltv_delta",
-          "type": "int32",
-          "description": "The CLTV delta from the current height that should be used to set the\ntimelock for the final hop.\n"
-        },
-        {
-          "name": "fee_limit",
-          "type": "FeeLimit",
-          "description": "The maximum number of satoshis that will be paid as a fee of the payment.\nThis value can be represented either as a percentage of the amount being\nsent, or as a fixed amount of the maximum fee the user is willing the pay to\nsend the payment.\n"
-        }
-      ],
-      "response": [
-        {
-          "name": "payment_error",
-          "type": "string",
-          "description": ""
-        },
-        {
-          "name": "payment_preimage",
-          "type": "bytes",
-          "description": ""
-        },
-        {
-          "name": "payment_route",
-          "type": "Route",
-          "description": ""
-        }
-      ]
-    },
-    "sendToRouteSync": {
-      "description": "SendToRouteSync is a synchronous version of SendToRoute. It Will block\nuntil the payment either fails or succeeds.\n",
-      "args": [
-        {
-          "name": "payment_hash",
-          "type": "bytes",
-          "description": "The payment hash to use for the HTLC."
-        },
-        {
-          "name": "payment_hash_string",
-          "type": "string",
-          "description": "An optional hex-encoded payment hash to be used for the HTLC."
-        },
-        {
-          "name": "Route",
-          "type": "repeated",
-          "description": "The set of routes that should be used to attempt to complete the payment."
-        }
-      ],
-      "response": [
-        {
-          "name": "payment_error",
-          "type": "string",
-          "description": ""
-        },
-        {
-          "name": "payment_preimage",
-          "type": "bytes",
-          "description": ""
-        },
-        {
-          "name": "payment_route",
-          "type": "Route",
-          "description": ""
-        }
-      ]
-    },
-    "addInvoice": {
-      "description": "AddInvoice attempts to add a new invoice to the invoice database. Any\nduplicated invoices are rejected, therefore all invoices *must* have a\nunique payment preimage.\n",
-      "args": [
-        {
-          "name": "memo",
-          "type": "string",
-          "description": "An optional memo to attach along with the invoice. Used for record keeping\npurposes for the invoice's creator, and will also be set in the description\nfield of the encoded payment request if the description_hash field is not\nbeing used.\n"
-        },
-        {
-          "name": "receipt",
-          "type": "bytes",
-          "description": "An optional cryptographic receipt of payment"
-        },
-        {
-          "name": "r_preimage",
-          "type": "bytes",
-          "description": "The hex-encoded preimage (32 byte) which will allow settling an incoming\nHTLC payable to this preimage\n"
-        },
-        {
-          "name": "r_hash",
-          "type": "bytes",
-          "description": "The hash of the preimage"
-        },
-        {
-          "name": "value",
-          "type": "int64",
-          "description": "The value of this invoice in satoshis"
-        },
-        {
-          "name": "settled",
-          "type": "bool",
-          "description": "Whether this invoice has been fulfilled"
-        },
-        {
-          "name": "creation_date",
-          "type": "int64",
-          "description": "When this invoice was created"
-        },
-        {
-          "name": "settle_date",
-          "type": "int64",
-          "description": "When this invoice was settled"
-        },
-        {
-          "name": "payment_request",
-          "type": "string",
-          "description": "A bare-bones invoice for a payment within the Lightning Network.  With the\ndetails of the invoice, the sender has all the data necessary to send a\npayment to the recipient.\n"
-        },
-        {
-          "name": "description_hash",
-          "type": "bytes",
-          "description": "Hash (SHA-256) of a description of the payment. Used if the description of\npayment (memo) is too long to naturally fit within the description field\nof an encoded payment request.\n"
-        },
-        {
-          "name": "expiry",
-          "type": "int64",
-          "description": "Payment request expiry time in seconds. Default is 3600 (1 hour)."
-        },
-        {
-          "name": "fallback_addr",
-          "type": "string",
-          "description": "Fallback on-chain address."
-        },
-        {
-          "name": "cltv_expiry",
-          "type": "uint64",
-          "description": "Delta to use for the time-lock of the CLTV extended to the final hop."
-        },
-        {
-          "name": "RouteHint",
-          "type": "repeated",
-          "description": "Route hints that can each be individually used to assist in reaching the\ninvoice's destination.\n"
-        },
-        {
-          "name": "private",
-          "type": "bool",
-          "description": "Whether this invoice should include routing hints for private channels."
-        },
-        {
-          "name": "add_index",
-          "type": "uint64",
-          "description": "The \"add\" index of this invoice. Each newly created invoice will increment\nthis index making it monotonically increasing. Callers to the\nSubscribeInvoices call can use this to instantly get notified of all added\ninvoices with an add_index greater than this one.\n"
-        },
-        {
-          "name": "settle_index",
-          "type": "uint64",
-          "description": "The \"settle\" index of this invoice. Each newly settled invoice will\nincrement this index making it monotonically increasing. Callers to the\nSubscribeInvoices call can use this to instantly get notified of all\nsettled invoices with an settle_index greater than this one.\n"
-        },
-        {
-          "name": "amt_paid",
-          "type": "int64",
-          "description": "Deprecated, use amt_paid_sat or amt_paid_msat."
-        },
-        {
-          "name": "amt_paid_sat",
-          "type": "int64",
-          "description": "The amount that was accepted for this invoice, in satoshis. This will ONLY\nbe set if this invoice has been settled. We provide this field as if the\ninvoice was created with a zero value, then we need to record what amount\nwas ultimately accepted. Additionally, it's possible that the sender paid\nMORE that was specified in the original invoice. So we'll record that here\nas well.\n"
-        },
-        {
-          "name": "amt_paid_msat",
-          "type": "int64",
-          "description": "The amount that was accepted for this invoice, in millisatoshis. This will\nONLY be set if this invoice has been settled. We provide this field as if\nthe invoice was created with a zero value, then we need to record what\namount was ultimately accepted. Additionally, it's possible that the sender\npaid MORE that was specified in the original invoice. So we'll record that\nhere as well.\n"
-        }
-      ],
-      "response": [
-        {
-          "name": "r_hash",
-          "type": "bytes",
-          "description": ""
-        },
-        {
-          "name": "payment_request",
-          "type": "string",
-          "description": "A bare-bones invoice for a payment within the Lightning Network.  With the\ndetails of the invoice, the sender has all the data necessary to send a\npayment to the recipient.\n"
-        },
-        {
-          "name": "add_index",
-          "type": "uint64",
-          "description": "The \"add\" index of this invoice. Each newly created invoice will increment\nthis index making it monotonically increasing. Callers to the\nSubscribeInvoices call can use this to instantly get notified of all added\ninvoices with an add_index greater than this one.\n"
-        }
-      ]
-    },
-    "listInvoices": {
-      "description": "ListInvoices returns a list of all the invoices currently stored within the\ndatabase. Any active debug invoices are ignored. It has full support for\npaginated responses, allowing users to query for specific invoices through\ntheir add_index. This can be done by using either the first_index_offset or\nlast_index_offset fields included in the response as the index_offset of the\nnext request. The reversed flag is set by default in order to paginate\nbackwards. If you wish to paginate forwards, you must explicitly set the\nflag to false. If none of the parameters are specified, then the last 100\ninvoices will be returned.\n",
-      "args": [
-        {
-          "name": "pending_only",
-          "type": "bool",
-          "description": "If set, only unsettled invoices will be returned in the response."
-        },
-        {
-          "name": "index_offset",
-          "type": "uint64",
-          "description": "The index of an invoice that will be used as either the start or end of a\nquery to determine which invoices should be returned in the response.\n"
-        },
-        {
-          "name": "num_max_invoices",
-          "type": "uint64",
-          "description": "The max number of invoices to return in the response to this query."
-        },
-        {
-          "name": "reversed",
-          "type": "bool",
-          "description": "If set, the invoices returned will result from seeking backwards from the\nspecified index offset. This can be used to paginate backwards.\n"
-        }
-      ],
-      "response": [
-        {
-          "name": "Invoice",
-          "type": "repeated",
-          "description": "A list of invoices from the time slice of the time series specified in the\nrequest.\n"
-        },
-        {
-          "name": "last_index_offset",
-          "type": "uint64",
-          "description": "The index of the last item in the set of returned invoices. This can be used\nto seek further, pagination style.\n"
-        },
-        {
-          "name": "first_index_offset",
-          "type": "uint64",
-          "description": "The index of the last item in the set of returned invoices. This can be used\nto seek backwards, pagination style.\n"
-        }
-      ]
-    },
-    "lookupInvoice": {
-      "description": "LookupInvoice attempts to look up an invoice according to its payment hash.\nThe passed payment hash *must* be exactly 32 bytes, if not, an error is\nreturned.\n",
-      "args": [
-        {
-          "name": "r_hash_str",
-          "type": "string",
-          "description": "The hex-encoded payment hash of the invoice to be looked up. The passed\npayment hash must be exactly 32 bytes, otherwise an error is returned.\n"
-        },
-        {
-          "name": "r_hash",
-          "type": "bytes",
-          "description": "The payment hash of the invoice to be looked up."
-        }
-      ],
-      "response": [
-        {
-          "name": "memo",
-          "type": "string",
-          "description": "An optional memo to attach along with the invoice. Used for record keeping\npurposes for the invoice's creator, and will also be set in the description\nfield of the encoded payment request if the description_hash field is not\nbeing used.\n"
-        },
-        {
-          "name": "receipt",
-          "type": "bytes",
-          "description": "An optional cryptographic receipt of payment"
-        },
-        {
-          "name": "r_preimage",
-          "type": "bytes",
-          "description": "The hex-encoded preimage (32 byte) which will allow settling an incoming\nHTLC payable to this preimage\n"
-        },
-        {
-          "name": "r_hash",
-          "type": "bytes",
-          "description": "The hash of the preimage"
-        },
-        {
-          "name": "value",
-          "type": "int64",
-          "description": "The value of this invoice in satoshis"
-        },
-        {
-          "name": "settled",
-          "type": "bool",
-          "description": "Whether this invoice has been fulfilled"
-        },
-        {
-          "name": "creation_date",
-          "type": "int64",
-          "description": "When this invoice was created"
-        },
-        {
-          "name": "settle_date",
-          "type": "int64",
-          "description": "When this invoice was settled"
-        },
-        {
-          "name": "payment_request",
-          "type": "string",
-          "description": "A bare-bones invoice for a payment within the Lightning Network.  With the\ndetails of the invoice, the sender has all the data necessary to send a\npayment to the recipient.\n"
-        },
-        {
-          "name": "description_hash",
-          "type": "bytes",
-          "description": "Hash (SHA-256) of a description of the payment. Used if the description of\npayment (memo) is too long to naturally fit within the description field\nof an encoded payment request.\n"
-        },
-        {
-          "name": "expiry",
-          "type": "int64",
-          "description": "Payment request expiry time in seconds. Default is 3600 (1 hour)."
-        },
-        {
-          "name": "fallback_addr",
-          "type": "string",
-          "description": "Fallback on-chain address."
-        },
-        {
-          "name": "cltv_expiry",
-          "type": "uint64",
-          "description": "Delta to use for the time-lock of the CLTV extended to the final hop."
-        },
-        {
-          "name": "RouteHint",
-          "type": "repeated",
-          "description": "Route hints that can each be individually used to assist in reaching the\ninvoice's destination.\n"
-        },
-        {
-          "name": "private",
-          "type": "bool",
-          "description": "Whether this invoice should include routing hints for private channels."
-        },
-        {
-          "name": "add_index",
-          "type": "uint64",
-          "description": "The \"add\" index of this invoice. Each newly created invoice will increment\nthis index making it monotonically increasing. Callers to the\nSubscribeInvoices call can use this to instantly get notified of all added\ninvoices with an add_index greater than this one.\n"
-        },
-        {
-          "name": "settle_index",
-          "type": "uint64",
-          "description": "The \"settle\" index of this invoice. Each newly settled invoice will\nincrement this index making it monotonically increasing. Callers to the\nSubscribeInvoices call can use this to instantly get notified of all\nsettled invoices with an settle_index greater than this one.\n"
-        },
-        {
-          "name": "amt_paid",
-          "type": "int64",
-          "description": "Deprecated, use amt_paid_sat or amt_paid_msat."
-        },
-        {
-          "name": "amt_paid_sat",
-          "type": "int64",
-          "description": "The amount that was accepted for this invoice, in satoshis. This will ONLY\nbe set if this invoice has been settled. We provide this field as if the\ninvoice was created with a zero value, then we need to record what amount\nwas ultimately accepted. Additionally, it's possible that the sender paid\nMORE that was specified in the original invoice. So we'll record that here\nas well.\n"
-        },
-        {
-          "name": "amt_paid_msat",
-          "type": "int64",
-          "description": "The amount that was accepted for this invoice, in millisatoshis. This will\nONLY be set if this invoice has been settled. We provide this field as if\nthe invoice was created with a zero value, then we need to record what\namount was ultimately accepted. Additionally, it's possible that the sender\npaid MORE that was specified in the original invoice. So we'll record that\nhere as well.\n"
-        }
-      ]
-    },
-    "decodePayReq": {
-      "description": "DecodePayReq takes an encoded payment request string and attempts to decode\nit, returning a full description of the conditions encoded within the\npayment request.\n",
-      "args": [
-        {
-          "name": "pay_req",
-          "type": "string",
-          "description": "The payment request string to be decoded"
-        }
-      ],
-      "response": [
-        {
-          "name": "destination",
-          "type": "string",
-          "description": ""
-        },
-        {
-          "name": "payment_hash",
-          "type": "string",
-          "description": ""
-        },
-        {
-          "name": "num_satoshis",
-          "type": "int64",
-          "description": ""
-        },
-        {
-          "name": "timestamp",
-          "type": "int64",
-          "description": ""
-        },
-        {
-          "name": "expiry",
-          "type": "int64",
-          "description": ""
-        },
-        {
-          "name": "description",
-          "type": "string",
-          "description": ""
-        },
-        {
-          "name": "description_hash",
-          "type": "string",
-          "description": ""
-        },
-        {
-          "name": "fallback_addr",
-          "type": "string",
-          "description": ""
-        },
-        {
-          "name": "cltv_expiry",
-          "type": "int64",
-          "description": ""
-        },
-        {
-          "name": "RouteHint",
-          "type": "repeated",
-          "description": ""
-        }
-      ]
-    },
-    "listPayments": {
-      "description": "ListPayments returns a list of all outgoing payments.\n",
-      "args": [],
-      "response": [
-        {
-          "name": "Payment",
-          "type": "repeated",
-          "description": "The list of payments"
-        }
-      ]
-    },
-    "deleteAllPayments": {
-      "description": "DeleteAllPayments deletes all outgoing payments from DB.\n",
-      "args": [],
-      "response": []
-    },
-    "describeGraph": {
-      "description": "DescribeGraph returns a description of the latest graph state from the\npoint of view of the node. The graph information is partitioned into two\ncomponents: all the nodes/vertexes, and all the edges that connect the\nvertexes themselves.  As this is a directed graph, the edges also contain\nthe node directional specific routing policy which includes: the time lock\ndelta, fee information, etc.\n",
-      "args": [
-        {
-          "name": "include_unannounced",
-          "type": "bool",
-          "description": "Whether unannounced channels are included in the response or not. If set,\nunannounced channels are included. Unannounced channels are both private\nchannels, and public channels that are not yet announced to the network.\n"
-        }
-      ],
-      "response": [
-        {
-          "name": "LightningNode",
-          "type": "repeated",
-          "description": "The list of `LightningNode`s in this channel graph"
-        },
-        {
-          "name": "ChannelEdge",
-          "type": "repeated",
-          "description": "The list of `ChannelEdge`s in this channel graph"
-        }
-      ]
-    },
-    "getChanInfo": {
-      "description": "GetChanInfo returns the latest authenticated network announcement for the\ngiven channel identified by its channel ID: an 8-byte integer which\nuniquely identifies the location of transaction's funding output within the\nblockchain.\n",
-      "args": [
-        {
-          "name": "chan_id",
-          "type": "uint64",
-          "description": "The unique channel ID for the channel. The first 3 bytes are the block\nheight, the next 3 the index within the block, and the last 2 bytes are the\noutput index for the channel.\n"
-        }
-      ],
-      "response": [
-        {
-          "name": "channel_id",
-          "type": "uint64",
-          "description": "The unique channel ID for the channel. The first 3 bytes are the block\nheight, the next 3 the index within the block, and the last 2 bytes are the\noutput index for the channel.\n"
-        },
-        {
-          "name": "chan_point",
-          "type": "string",
-          "description": ""
-        },
-        {
-          "name": "last_update",
-          "type": "uint32",
-          "description": ""
-        },
-        {
-          "name": "node",
-          "type": "string",
-          "description": ""
-        },
-        {
-          "name": "node",
-          "type": "string",
-          "description": ""
-        },
-        {
-          "name": "capacity",
-          "type": "int64",
-          "description": ""
-        },
-        {
-          "name": "node",
-          "type": "RoutingPolicy",
-          "description": ""
-        },
-        {
-          "name": "node",
-          "type": "RoutingPolicy",
-          "description": ""
-        }
-      ]
-    },
-    "getNodeInfo": {
-      "description": "GetNodeInfo returns the latest advertised, aggregated, and authenticated\nchannel information for the specified node identified by its public key.\n",
-      "args": [
-        {
-          "name": "pub_key",
-          "type": "string",
-          "description": "The 33-byte hex-encoded compressed public of the target node "
-        }
-      ],
-      "response": [
-        {
-          "name": "node",
-          "type": "LightningNode",
-          "description": "An individual vertex/node within the channel graph. A node is\nconnected to other nodes by one or more channel edges emanating from it. As\nthe graph is directed, a node will also have an incoming edge attached to\nit for each outgoing edge.\n"
-        },
-        {
-          "name": "num_channels",
-          "type": "uint32",
-          "description": ""
-        },
-        {
-          "name": "total_capacity",
-          "type": "int64",
-          "description": ""
-        }
-      ]
-    },
-    "getNetworkInfo": {
-      "description": "GetNetworkInfo returns some basic stats about the known channel graph from\nthe point of view of the node.\n",
-      "args": [],
-      "response": [
-        {
-          "name": "graph_diameter",
-          "type": "uint32",
-          "description": ""
-        },
-        {
-          "name": "avg_out_degree",
-          "type": "double",
-          "description": ""
-        },
-        {
-          "name": "max_out_degree",
-          "type": "uint32",
-          "description": ""
-        },
-        {
-          "name": "num_nodes",
-          "type": "uint32",
-          "description": ""
-        },
-        {
-          "name": "num_channels",
-          "type": "uint32",
-          "description": ""
-        },
-        {
-          "name": "total_network_capacity",
-          "type": "int64",
-          "description": ""
-        },
-        {
-          "name": "avg_channel_size",
-          "type": "double",
-          "description": ""
-        },
-        {
-          "name": "min_channel_size",
-          "type": "int64",
-          "description": ""
-        },
-        {
-          "name": "max_channel_size",
-          "type": "int64",
-          "description": ""
-        },
-        {
-          "name": "rate",
-          "type": "fee",
-          "description": ""
-        },
-        {
-          "name": "additional",
-          "type": "also",
-          "description": ""
-        }
-      ]
-    },
-    "debugLevel": {
-      "description": "DebugLevel allows a caller to programmatically set the logging verbosity of\nlnd. The logging can be targeted according to a coarse daemon-wide logging\nlevel, or in a granular fashion to specify the logging for a target\nsub-system.\n",
-      "args": [
-        {
-          "name": "show",
-          "type": "bool",
-          "description": ""
-        },
-        {
-          "name": "level_spec",
-          "type": "string",
-          "description": ""
-        }
-      ],
-      "response": [
-        {
-          "name": "sub_systems",
-          "type": "string",
-          "description": ""
-        }
-      ]
-    }
+  "genSeed": {
+    "description": "GenSeed is the first method that should be used to instantiate a new lnd\ninstance. This method allows a caller to generate a new aezeed cipher seed\ngiven an optional passphrase. If provided, the passphrase will be necessary\nto decrypt the cipherseed to expose the internal wallet seed.\n\nOnce the cipherseed is obtained and verified by the user, the InitWallet\nmethod should be used to commit the newly generated seed, and create the\nwallet.\n",
+    "args": [
+      {
+        "name": "aezeed_passphrase",
+        "type": "bytes",
+        "description": "aezeed_passphrase is an optional user provided passphrase that will be used\nto encrypt the generated aezeed cipher seed.\n"
+      },
+      {
+        "name": "seed_entropy",
+        "type": "bytes",
+        "description": "seed_entropy is an optional 16-bytes generated via CSPRNG. If not\nspecified, then a fresh set of randomness will be used to create the seed.\n"
+      }
+    ],
+    "response": [
+      {
+        "name": "string",
+        "type": "repeated",
+        "description": "cipher_seed_mnemonic is a 24-word mnemonic that encodes a prior aezeed\ncipher seed obtained by the user. This field is optional, as if not\nprovided, then the daemon will generate a new cipher seed for the user.\nOtherwise, then the daemon will attempt to recover the wallet state linked\nto this cipher seed.\n"
+      },
+      {
+        "name": "enciphered_seed",
+        "type": "bytes",
+        "description": "enciphered_seed are the raw aezeed cipher seed bytes. This is the raw\ncipher text before run through our mnemonic encoding scheme.\n"
+      }
+    ]
+  },
+  "initWallet": {
+    "description": "InitWallet is used when lnd is starting up for the first time to fully\ninitialize the daemon and its internal wallet. At the very least a wallet\npassword must be provided. This will be used to encrypt sensitive material\non disk.\n\nIn the case of a recovery scenario, the user can also specify their aezeed\nmnemonic and passphrase. If set, then the daemon will use this prior state\nto initialize its internal wallet.\n\nAlternatively, this can be used along with the GenSeed RPC to obtain a\nseed, then present it to the user. Once it has been verified by the user,\nthe seed can be fed into this RPC in order to commit the new wallet.\n",
+    "args": [
+      {
+        "name": "wallet_password",
+        "type": "bytes",
+        "description": "wallet_password is the passphrase that should be used to encrypt the\nwallet. This MUST be at least 8 chars in length. After creation, this\npassword is required to unlock the daemon.\n"
+      },
+      {
+        "name": "string",
+        "type": "repeated",
+        "description": "cipher_seed_mnemonic is a 24-word mnemonic that encodes a prior aezeed\ncipher seed obtained by the user. This may have been generated by the\nGenSeed method, or be an existing seed.\n"
+      },
+      {
+        "name": "aezeed_passphrase",
+        "type": "bytes",
+        "description": "aezeed_passphrase is an optional user provided passphrase that will be used\nto encrypt the generated aezeed cipher seed.\n"
+      },
+      {
+        "name": "recovery_window",
+        "type": "int32",
+        "description": "recovery_window is an optional argument specifying the address lookahead\nwhen restoring a wallet seed. The recovery window applies to each\ninvdividual branch of the BIP44 derivation paths. Supplying a recovery\nwindow of zero indicates that no addresses should be recovered, such after\nthe first initialization of the wallet.\n"
+      }
+    ],
+    "response": []
+  },
+  "unlockWallet": {
+    "description": "UnlockWallet is used at startup of lnd to provide a password to unlock\nthe wallet database.\n",
+    "args": [
+      {
+        "name": "wallet_password",
+        "type": "bytes",
+        "description": "wallet_password should be the current valid passphrase for the daemon. This\nwill be required to decrypt on-disk material that the daemon requires to\nfunction properly.\n"
+      },
+      {
+        "name": "recovery_window",
+        "type": "int32",
+        "description": "recovery_window is an optional argument specifying the address lookahead\nwhen restoring a wallet seed. The recovery window applies to each\ninvdividual branch of the BIP44 derivation paths. Supplying a recovery\nwindow of zero indicates that no addresses should be recovered, such after\nthe first initialization of the wallet.\n"
+      }
+    ],
+    "response": []
+  },
+  "changePassword": {
+    "description": "ChangePassword changes the password of the encrypted wallet. This will\nautomatically unlock the wallet database if successful.\n",
+    "args": [
+      {
+        "name": "current_password",
+        "type": "bytes",
+        "description": "current_password should be the current valid passphrase used to unlock the\ndaemon.\n"
+      },
+      {
+        "name": "new_password",
+        "type": "bytes",
+        "description": "new_password should be the new passphrase that will be needed to unlock the\ndaemon.\n"
+      }
+    ],
+    "response": []
+  },
+  "walletBalance": {
+    "description": "WalletBalance returns total unspent outputs(confirmed and unconfirmed), all\nconfirmed unspent outputs and all unconfirmed unspent outputs under control\nof the wallet. \n",
+    "args": [],
+    "response": [
+      {
+        "name": "total_balance",
+        "type": "int64",
+        "description": "The balance of the wallet"
+      },
+      {
+        "name": "confirmed_balance",
+        "type": "int64",
+        "description": "The confirmed balance of a wallet(with >= 1 confirmations)"
+      },
+      {
+        "name": "unconfirmed_balance",
+        "type": "int64",
+        "description": "The unconfirmed balance of a wallet(with 0 confirmations)"
+      }
+    ]
+  },
+  "channelBalance": {
+    "description": "ChannelBalance returns the total funds available across all open channels\nin satoshis.\n",
+    "args": [],
+    "response": [
+      {
+        "name": "balance",
+        "type": "int64",
+        "description": "Sum of channels balances denominated in satoshis"
+      },
+      {
+        "name": "pending_open_balance",
+        "type": "int64",
+        "description": "Sum of channels pending balances denominated in satoshis"
+      }
+    ]
+  },
+  "getTransactions": {
+    "description": "GetTransactions returns a list describing all the known transactions\nrelevant to the wallet.\n",
+    "args": [],
+    "response": [
+      {
+        "name": "Transaction",
+        "type": "repeated",
+        "description": "The list of transactions relevant to the wallet."
+      }
+    ]
+  },
+  "sendCoins": {
+    "description": "SendCoins executes a request to send coins to a particular address. Unlike\nSendMany, this RPC call only allows creating a single output at a time. If\nneither target_conf, or sat_per_byte are set, then the internal wallet will\nconsult its fee model to determine a fee for the default confirmation\ntarget.\n",
+    "args": [
+      {
+        "name": "addr",
+        "type": "string",
+        "description": "The address to send coins to "
+      },
+      {
+        "name": "amount",
+        "type": "int64",
+        "description": "The amount in satoshis to send"
+      },
+      {
+        "name": "target_conf",
+        "type": "int32",
+        "description": "The target number of blocks that this transaction should be confirmed by."
+      },
+      {
+        "name": "sat_per_byte",
+        "type": "int64",
+        "description": "A manual fee rate set in sat/byte that should be used when crafting the transaction."
+      }
+    ],
+    "response": [
+      {
+        "name": "txid",
+        "type": "string",
+        "description": "The transaction ID of the transaction"
+      }
+    ]
+  },
+  "subscribeTransactions": {
+    "description": "SubscribeTransactions creates a uni-directional stream from the server to\nthe client in which any newly discovered transactions relevant to the\nwallet are sent over.\n",
+    "args": [],
+    "response": [
+      {
+        "name": "tx_hash",
+        "type": "string",
+        "description": "The transaction hash"
+      },
+      {
+        "name": "amount",
+        "type": "int64",
+        "description": "The transaction amount, denominated in satoshis"
+      },
+      {
+        "name": "num_confirmations",
+        "type": "int32",
+        "description": "The number of confirmations"
+      },
+      {
+        "name": "block_hash",
+        "type": "string",
+        "description": "The hash of the block this transaction was included in"
+      },
+      {
+        "name": "block_height",
+        "type": "int32",
+        "description": "The height of the block this transaction was included in"
+      },
+      {
+        "name": "time_stamp",
+        "type": "int64",
+        "description": "Timestamp of this transaction "
+      },
+      {
+        "name": "total_fees",
+        "type": "int64",
+        "description": "Fees paid for this transaction"
+      },
+      {
+        "name": "string",
+        "type": "repeated",
+        "description": "Addresses that received funds for this transaction"
+      }
+    ]
+  },
+  "sendMany": {
+    "description": "SendMany handles a request for a transaction that creates multiple specified\noutputs in parallel. If neither target_conf, or sat_per_byte are set, then\nthe internal wallet will consult its fee model to determine a fee for the\ndefault confirmation target.\n",
+    "args": [
+      {
+        "name": "target_conf",
+        "type": "int32",
+        "description": "The target number of blocks that this transaction should be confirmed by."
+      },
+      {
+        "name": "sat_per_byte",
+        "type": "int64",
+        "description": "A manual fee rate set in sat/byte that should be used when crafting the transaction."
+      }
+    ],
+    "response": [
+      {
+        "name": "txid",
+        "type": "string",
+        "description": "The id of the transaction"
+      }
+    ]
+  },
+  "newAddress": {
+    "description": "NewAddress creates a new address under control of the local wallet.\n",
+    "args": [
+      {
+        "name": "type",
+        "type": "AddressType",
+        "description": "The address type"
+      }
+    ],
+    "response": [
+      {
+        "name": "address",
+        "type": "string",
+        "description": "The newly generated wallet address"
+      }
+    ]
+  },
+  "signMessage": {
+    "description": "SignMessage signs a message with this node's private key. The returned\nsignature string is `zbase32` encoded and pubkey recoverable, meaning that\nonly the message digest and signature are needed for verification.\n",
+    "args": [],
+    "response": [
+      {
+        "name": "signature",
+        "type": "string",
+        "description": "The signature for the given message"
+      }
+    ]
+  },
+  "verifyMessage": {
+    "description": "VerifyMessage verifies a signature over a msg. The signature must be\nzbase32 encoded and signed by an active node in the resident node's\nchannel database. In addition to returning the validity of the signature,\nVerifyMessage also returns the recovered pubkey from the signature.\n",
+    "args": [],
+    "response": [
+      {
+        "name": "valid",
+        "type": "bool",
+        "description": "Whether the signature was valid over the given message"
+      },
+      {
+        "name": "pubkey",
+        "type": "string",
+        "description": "The pubkey recovered from the signature"
+      }
+    ]
+  },
+  "connectPeer": {
+    "description": "ConnectPeer attempts to establish a connection to a remote peer. This is at\nthe networking level, and is used for communication between nodes. This is\ndistinct from establishing a channel with a peer.\n",
+    "args": [
+      {
+        "name": "addr",
+        "type": "LightningAddress",
+        "description": "Lightning address of the peer, in the format `<pubkey>@host`"
+      },
+      {
+        "name": "set",
+        "type": "If",
+        "description": ""
+      },
+      {
+        "name": "call",
+        "type": "the",
+        "description": ""
+      },
+      {
+        "name": "perm",
+        "type": "bool",
+        "description": ""
+      }
+    ],
+    "response": []
+  },
+  "disconnectPeer": {
+    "description": "DisconnectPeer attempts to disconnect one peer from another identified by a\ngiven pubKey. In the case that we currently have a pending or active channel\nwith the target peer, then this action will be not be allowed.\n",
+    "args": [
+      {
+        "name": "pub_key",
+        "type": "string",
+        "description": "The pubkey of the node to disconnect from"
+      }
+    ],
+    "response": []
+  },
+  "listPeers": {
+    "description": "ListPeers returns a verbose listing of all currently active peers.\n",
+    "args": [],
+    "response": [
+      {
+        "name": "Peer",
+        "type": "repeated",
+        "description": "The list of currently connected peers"
+      }
+    ]
+  },
+  "getInfo": {
+    "description": "GetInfo returns general information concerning the lightning node including\nit's identity pubkey, alias, the chains it is connected to, and information\nconcerning the number of open+pending channels.\n",
+    "args": [],
+    "response": [
+      {
+        "name": "identity_pubkey",
+        "type": "string",
+        "description": "The identity pubkey of the current node."
+      },
+      {
+        "name": "alias",
+        "type": "string",
+        "description": "If applicable, the alias of the current node, e.g. \"bob\""
+      },
+      {
+        "name": "num_pending_channels",
+        "type": "uint32",
+        "description": "Number of pending channels"
+      },
+      {
+        "name": "num_active_channels",
+        "type": "uint32",
+        "description": "Number of active channels"
+      },
+      {
+        "name": "num_peers",
+        "type": "uint32",
+        "description": "Number of peers"
+      },
+      {
+        "name": "block_height",
+        "type": "uint32",
+        "description": "The node's current view of the height of the best block"
+      },
+      {
+        "name": "block_hash",
+        "type": "string",
+        "description": "The node's current view of the hash of the best block"
+      },
+      {
+        "name": "synced_to_chain",
+        "type": "bool",
+        "description": "Whether the wallet's view is synced to the main chain"
+      },
+      {
+        "name": "testnet",
+        "type": "bool",
+        "description": "Whether the current node is connected to testnet"
+      },
+      {
+        "name": "string",
+        "type": "repeated",
+        "description": "A list of active chains the node is connected to"
+      },
+      {
+        "name": "string",
+        "type": "repeated",
+        "description": "The URIs of the current node."
+      },
+      {
+        "name": "best_header_timestamp",
+        "type": "int64",
+        "description": "Timestamp of the block best known to the wallet"
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "description": "The version of the LND software that the node is running."
+      },
+      {
+        "name": "num_inactive_channels",
+        "type": "uint32",
+        "description": "Number of inactive channels"
+      }
+    ]
+  },
+  "pendingChannels": {
+    "description": "PendingChannels returns a list of all the channels that are currently\nconsidered \"pending\". A channel is pending if it has finished the funding\nworkflow and is waiting for confirmations for the funding txn, or is in the\nprocess of closure, either initiated cooperatively or non-cooperatively.\n",
+    "args": [],
+    "response": []
+  },
+  "listChannels": {
+    "description": "ListChannels returns a description of all the open channels that this node\nis a participant in.\n",
+    "args": [
+      {
+        "name": "active_only",
+        "type": "bool",
+        "description": ""
+      },
+      {
+        "name": "inactive_only",
+        "type": "bool",
+        "description": ""
+      },
+      {
+        "name": "public_only",
+        "type": "bool",
+        "description": ""
+      },
+      {
+        "name": "private_only",
+        "type": "bool",
+        "description": ""
+      }
+    ],
+    "response": [
+      {
+        "name": "Channel",
+        "type": "repeated",
+        "description": "The list of active channels"
+      }
+    ]
+  },
+  "closedChannels": {
+    "description": "ClosedChannels returns a description of all the closed channels that \nthis node was a participant in.\n",
+    "args": [
+      {
+        "name": "cooperative",
+        "type": "bool",
+        "description": ""
+      },
+      {
+        "name": "local_force",
+        "type": "bool",
+        "description": ""
+      },
+      {
+        "name": "remote_force",
+        "type": "bool",
+        "description": ""
+      },
+      {
+        "name": "breach",
+        "type": "bool",
+        "description": ""
+      },
+      {
+        "name": "funding_canceled",
+        "type": "bool",
+        "description": ""
+      },
+      {
+        "name": "abandoned",
+        "type": "bool",
+        "description": ""
+      }
+    ],
+    "response": [
+      {
+        "name": "ChannelCloseSummary",
+        "type": "repeated",
+        "description": ""
+      }
+    ]
+  },
+  "openChannelSync": {
+    "description": "OpenChannelSync is a synchronous version of the OpenChannel RPC call. This\ncall is meant to be consumed by clients to the REST proxy. As with all\nother sync calls, all byte slices are intended to be populated as hex\nencoded strings.\n",
+    "args": [
+      {
+        "name": "node_pubkey",
+        "type": "bytes",
+        "description": "The pubkey of the node to open a channel with"
+      },
+      {
+        "name": "node_pubkey_string",
+        "type": "string",
+        "description": "The hex encoded pubkey of the node to open a channel with"
+      },
+      {
+        "name": "local_funding_amount",
+        "type": "int64",
+        "description": "The number of satoshis the wallet should commit to the channel"
+      },
+      {
+        "name": "push_sat",
+        "type": "int64",
+        "description": "The number of satoshis to push to the remote side as part of the initial commitment state"
+      },
+      {
+        "name": "target_conf",
+        "type": "int32",
+        "description": "The target number of blocks that the funding transaction should be confirmed by."
+      },
+      {
+        "name": "sat_per_byte",
+        "type": "int64",
+        "description": "A manual fee rate set in sat/byte that should be used when crafting the funding transaction."
+      },
+      {
+        "name": "private",
+        "type": "bool",
+        "description": "Whether this channel should be private, not announced to the greater network."
+      },
+      {
+        "name": "min_htlc_msat",
+        "type": "int64",
+        "description": "The minimum value in millisatoshi we will require for incoming HTLCs on the channel."
+      },
+      {
+        "name": "remote_csv_delay",
+        "type": "uint32",
+        "description": "The delay we require on the remote's commitment transaction. If this is not set, it will be scaled automatically with the channel size."
+      },
+      {
+        "name": "min_confs",
+        "type": "int32",
+        "description": "The minimum number of confirmations each one of your outputs used for the funding transaction must satisfy."
+      },
+      {
+        "name": "spend_unconfirmed",
+        "type": "bool",
+        "description": "Whether unconfirmed outputs should be used as inputs for the funding transaction."
+      }
+    ],
+    "response": [
+      {
+        "name": "funding_txid",
+        "type": "oneof",
+        "description": ""
+      },
+      {
+        "name": "funding_txid_bytes",
+        "type": "bytes",
+        "description": "Txid of the funding transaction"
+      },
+      {
+        "name": "funding_txid_str",
+        "type": "string",
+        "description": "Hex-encoded string representing the funding transaction"
+      },
+      {
+        "name": "output_index",
+        "type": "uint32",
+        "description": "The index of the output of the funding transaction"
+      }
+    ]
+  },
+  "openChannel": {
+    "description": "OpenChannel attempts to open a singly funded channel specified in the\nrequest to a remote peer. Users are able to specify a target number of\nblocks that the funding transaction should be confirmed in, or a manual fee\nrate to us for the funding transaction. If neither are specified, then a\nlax block confirmation target is used.\n",
+    "args": [
+      {
+        "name": "node_pubkey",
+        "type": "bytes",
+        "description": "The pubkey of the node to open a channel with"
+      },
+      {
+        "name": "node_pubkey_string",
+        "type": "string",
+        "description": "The hex encoded pubkey of the node to open a channel with"
+      },
+      {
+        "name": "local_funding_amount",
+        "type": "int64",
+        "description": "The number of satoshis the wallet should commit to the channel"
+      },
+      {
+        "name": "push_sat",
+        "type": "int64",
+        "description": "The number of satoshis to push to the remote side as part of the initial commitment state"
+      },
+      {
+        "name": "target_conf",
+        "type": "int32",
+        "description": "The target number of blocks that the funding transaction should be confirmed by."
+      },
+      {
+        "name": "sat_per_byte",
+        "type": "int64",
+        "description": "A manual fee rate set in sat/byte that should be used when crafting the funding transaction."
+      },
+      {
+        "name": "private",
+        "type": "bool",
+        "description": "Whether this channel should be private, not announced to the greater network."
+      },
+      {
+        "name": "min_htlc_msat",
+        "type": "int64",
+        "description": "The minimum value in millisatoshi we will require for incoming HTLCs on the channel."
+      },
+      {
+        "name": "remote_csv_delay",
+        "type": "uint32",
+        "description": "The delay we require on the remote's commitment transaction. If this is not set, it will be scaled automatically with the channel size."
+      },
+      {
+        "name": "min_confs",
+        "type": "int32",
+        "description": "The minimum number of confirmations each one of your outputs used for the funding transaction must satisfy."
+      },
+      {
+        "name": "spend_unconfirmed",
+        "type": "bool",
+        "description": "Whether unconfirmed outputs should be used as inputs for the funding transaction."
+      }
+    ],
+    "response": [
+      {
+        "name": "update",
+        "type": "oneof",
+        "description": ""
+      },
+      {
+        "name": "chan_pending",
+        "type": "PendingUpdate",
+        "description": ""
+      },
+      {
+        "name": "confirmation",
+        "type": "ConfirmationUpdate",
+        "description": ""
+      },
+      {
+        "name": "chan_open",
+        "type": "ChannelOpenUpdate",
+        "description": ""
+      }
+    ]
+  },
+  "closeChannel": {
+    "description": "CloseChannel attempts to close an active channel identified by its channel\noutpoint (ChannelPoint). The actions of this method can additionally be\naugmented to attempt a force close after a timeout period in the case of an\ninactive peer. If a non-force close (cooperative closure) is requested,\nthen the user can specify either a target number of blocks until the\nclosure transaction is confirmed, or a manual fee rate. If neither are\nspecified, then a default lax, block confirmation target is used.\n",
+    "args": [
+      {
+        "name": "channel_point",
+        "type": "ChannelPoint",
+        "description": "The outpoint (txid:index) of the funding transaction. With this value, Bob\nwill be able to generate a signature for Alice's version of the commitment\ntransaction.\n"
+      },
+      {
+        "name": "force",
+        "type": "bool",
+        "description": "If true, then the channel will be closed forcibly. This means the current commitment transaction will be signed and broadcast."
+      },
+      {
+        "name": "target_conf",
+        "type": "int32",
+        "description": "The target number of blocks that the closure transaction should be confirmed by."
+      },
+      {
+        "name": "sat_per_byte",
+        "type": "int64",
+        "description": "A manual fee rate set in sat/byte that should be used when crafting the closure transaction."
+      }
+    ],
+    "response": [
+      {
+        "name": "update",
+        "type": "oneof",
+        "description": ""
+      },
+      {
+        "name": "close_pending",
+        "type": "PendingUpdate",
+        "description": ""
+      },
+      {
+        "name": "confirmation",
+        "type": "ConfirmationUpdate",
+        "description": ""
+      },
+      {
+        "name": "chan_close",
+        "type": "ChannelCloseUpdate",
+        "description": ""
+      }
+    ]
+  },
+  "abandonChannel": {
+    "description": "AbandonChannel removes all channel state from the database except for a\nclose summary. This method can be used to get rid of permanently unusable\nchannels due to bugs fixed in newer versions of lnd. Only available\nwhen in debug builds of lnd.\n",
+    "args": [
+      {
+        "name": "channel_point",
+        "type": "ChannelPoint",
+        "description": ""
+      }
+    ],
+    "response": []
+  },
+  "sendPayment": {
+    "description": "SendPayment dispatches a bi-directional streaming RPC for sending payments\nthrough the Lightning Network. A single RPC invocation creates a persistent\nbi-directional stream allowing clients to rapidly send payments through the\nLightning Network with a single persistent connection.\n",
+    "args": [
+      {
+        "name": "dest",
+        "type": "bytes",
+        "description": "The identity pubkey of the payment recipient"
+      },
+      {
+        "name": "dest_string",
+        "type": "string",
+        "description": "The hex-encoded identity pubkey of the payment recipient"
+      },
+      {
+        "name": "amt",
+        "type": "int64",
+        "description": "Number of satoshis to send."
+      },
+      {
+        "name": "payment_hash",
+        "type": "bytes",
+        "description": "The hash to use within the payment's HTLC"
+      },
+      {
+        "name": "payment_hash_string",
+        "type": "string",
+        "description": "The hex-encoded hash to use within the payment's HTLC"
+      },
+      {
+        "name": "payment_request",
+        "type": "string",
+        "description": "A bare-bones invoice for a payment within the Lightning Network.  With the\ndetails of the invoice, the sender has all the data necessary to send a\npayment to the recipient.\n"
+      },
+      {
+        "name": "final_cltv_delta",
+        "type": "int32",
+        "description": "The CLTV delta from the current height that should be used to set the\ntimelock for the final hop.\n"
+      },
+      {
+        "name": "fee_limit",
+        "type": "FeeLimit",
+        "description": "The maximum number of satoshis that will be paid as a fee of the payment.\nThis value can be represented either as a percentage of the amount being\nsent, or as a fixed amount of the maximum fee the user is willing the pay to\nsend the payment.\n"
+      }
+    ],
+    "response": [
+      {
+        "name": "payment_error",
+        "type": "string",
+        "description": ""
+      },
+      {
+        "name": "payment_preimage",
+        "type": "bytes",
+        "description": ""
+      },
+      {
+        "name": "payment_route",
+        "type": "Route",
+        "description": ""
+      }
+    ]
+  },
+  "sendPaymentSync": {
+    "description": "SendPaymentSync is the synchronous non-streaming version of SendPayment.\nThis RPC is intended to be consumed by clients of the REST proxy.\nAdditionally, this RPC expects the destination's public key and the payment\nhash (if any) to be encoded as hex strings.\n",
+    "args": [
+      {
+        "name": "dest",
+        "type": "bytes",
+        "description": "The identity pubkey of the payment recipient"
+      },
+      {
+        "name": "dest_string",
+        "type": "string",
+        "description": "The hex-encoded identity pubkey of the payment recipient"
+      },
+      {
+        "name": "amt",
+        "type": "int64",
+        "description": "Number of satoshis to send."
+      },
+      {
+        "name": "payment_hash",
+        "type": "bytes",
+        "description": "The hash to use within the payment's HTLC"
+      },
+      {
+        "name": "payment_hash_string",
+        "type": "string",
+        "description": "The hex-encoded hash to use within the payment's HTLC"
+      },
+      {
+        "name": "payment_request",
+        "type": "string",
+        "description": "A bare-bones invoice for a payment within the Lightning Network.  With the\ndetails of the invoice, the sender has all the data necessary to send a\npayment to the recipient.\n"
+      },
+      {
+        "name": "final_cltv_delta",
+        "type": "int32",
+        "description": "The CLTV delta from the current height that should be used to set the\ntimelock for the final hop.\n"
+      },
+      {
+        "name": "fee_limit",
+        "type": "FeeLimit",
+        "description": "The maximum number of satoshis that will be paid as a fee of the payment.\nThis value can be represented either as a percentage of the amount being\nsent, or as a fixed amount of the maximum fee the user is willing the pay to\nsend the payment.\n"
+      }
+    ],
+    "response": [
+      {
+        "name": "payment_error",
+        "type": "string",
+        "description": ""
+      },
+      {
+        "name": "payment_preimage",
+        "type": "bytes",
+        "description": ""
+      },
+      {
+        "name": "payment_route",
+        "type": "Route",
+        "description": ""
+      }
+    ]
+  },
+  "sendToRoute": {
+    "description": "SendToRoute is a bi-directional streaming RPC for sending payment through\nthe Lightning Network. This method differs from SendPayment in that it\nallows users to specify a full route manually. This can be used for things\nlike rebalancing, and atomic swaps.\n",
+    "args": [
+      {
+        "name": "payment_hash",
+        "type": "bytes",
+        "description": "The payment hash to use for the HTLC."
+      },
+      {
+        "name": "payment_hash_string",
+        "type": "string",
+        "description": "An optional hex-encoded payment hash to be used for the HTLC."
+      },
+      {
+        "name": "Route",
+        "type": "repeated",
+        "description": "The set of routes that should be used to attempt to complete the payment."
+      }
+    ],
+    "response": [
+      {
+        "name": "payment_error",
+        "type": "string",
+        "description": ""
+      },
+      {
+        "name": "payment_preimage",
+        "type": "bytes",
+        "description": ""
+      },
+      {
+        "name": "payment_route",
+        "type": "Route",
+        "description": ""
+      }
+    ]
+  },
+  "sendToRouteSync": {
+    "description": "SendToRouteSync is a synchronous version of SendToRoute. It Will block\nuntil the payment either fails or succeeds.\n",
+    "args": [
+      {
+        "name": "payment_hash",
+        "type": "bytes",
+        "description": "The payment hash to use for the HTLC."
+      },
+      {
+        "name": "payment_hash_string",
+        "type": "string",
+        "description": "An optional hex-encoded payment hash to be used for the HTLC."
+      },
+      {
+        "name": "Route",
+        "type": "repeated",
+        "description": "The set of routes that should be used to attempt to complete the payment."
+      }
+    ],
+    "response": [
+      {
+        "name": "payment_error",
+        "type": "string",
+        "description": ""
+      },
+      {
+        "name": "payment_preimage",
+        "type": "bytes",
+        "description": ""
+      },
+      {
+        "name": "payment_route",
+        "type": "Route",
+        "description": ""
+      }
+    ]
+  },
+  "addInvoice": {
+    "description": "AddInvoice attempts to add a new invoice to the invoice database. Any\nduplicated invoices are rejected, therefore all invoices *must* have a\nunique payment preimage.\n",
+    "args": [
+      {
+        "name": "memo",
+        "type": "string",
+        "description": "An optional memo to attach along with the invoice. Used for record keeping\npurposes for the invoice's creator, and will also be set in the description\nfield of the encoded payment request if the description_hash field is not\nbeing used.\n"
+      },
+      {
+        "name": "receipt",
+        "type": "bytes",
+        "description": "An optional cryptographic receipt of payment"
+      },
+      {
+        "name": "r_preimage",
+        "type": "bytes",
+        "description": "The hex-encoded preimage (32 byte) which will allow settling an incoming\nHTLC payable to this preimage\n"
+      },
+      {
+        "name": "r_hash",
+        "type": "bytes",
+        "description": "The hash of the preimage"
+      },
+      {
+        "name": "value",
+        "type": "int64",
+        "description": "The value of this invoice in satoshis"
+      },
+      {
+        "name": "settled",
+        "type": "bool",
+        "description": "Whether this invoice has been fulfilled"
+      },
+      {
+        "name": "creation_date",
+        "type": "int64",
+        "description": "When this invoice was created"
+      },
+      {
+        "name": "settle_date",
+        "type": "int64",
+        "description": "When this invoice was settled"
+      },
+      {
+        "name": "payment_request",
+        "type": "string",
+        "description": "A bare-bones invoice for a payment within the Lightning Network.  With the\ndetails of the invoice, the sender has all the data necessary to send a\npayment to the recipient.\n"
+      },
+      {
+        "name": "description_hash",
+        "type": "bytes",
+        "description": "Hash (SHA-256) of a description of the payment. Used if the description of\npayment (memo) is too long to naturally fit within the description field\nof an encoded payment request.\n"
+      },
+      {
+        "name": "expiry",
+        "type": "int64",
+        "description": "Payment request expiry time in seconds. Default is 3600 (1 hour)."
+      },
+      {
+        "name": "fallback_addr",
+        "type": "string",
+        "description": "Fallback on-chain address."
+      },
+      {
+        "name": "cltv_expiry",
+        "type": "uint64",
+        "description": "Delta to use for the time-lock of the CLTV extended to the final hop."
+      },
+      {
+        "name": "RouteHint",
+        "type": "repeated",
+        "description": "Route hints that can each be individually used to assist in reaching the\ninvoice's destination.\n"
+      },
+      {
+        "name": "private",
+        "type": "bool",
+        "description": "Whether this invoice should include routing hints for private channels."
+      },
+      {
+        "name": "add_index",
+        "type": "uint64",
+        "description": "The \"add\" index of this invoice. Each newly created invoice will increment\nthis index making it monotonically increasing. Callers to the\nSubscribeInvoices call can use this to instantly get notified of all added\ninvoices with an add_index greater than this one.\n"
+      },
+      {
+        "name": "settle_index",
+        "type": "uint64",
+        "description": "The \"settle\" index of this invoice. Each newly settled invoice will\nincrement this index making it monotonically increasing. Callers to the\nSubscribeInvoices call can use this to instantly get notified of all\nsettled invoices with an settle_index greater than this one.\n"
+      },
+      {
+        "name": "amt_paid",
+        "type": "int64",
+        "description": "Deprecated, use amt_paid_sat or amt_paid_msat."
+      },
+      {
+        "name": "amt_paid_sat",
+        "type": "int64",
+        "description": "The amount that was accepted for this invoice, in satoshis. This will ONLY\nbe set if this invoice has been settled. We provide this field as if the\ninvoice was created with a zero value, then we need to record what amount\nwas ultimately accepted. Additionally, it's possible that the sender paid\nMORE that was specified in the original invoice. So we'll record that here\nas well.\n"
+      },
+      {
+        "name": "amt_paid_msat",
+        "type": "int64",
+        "description": "The amount that was accepted for this invoice, in millisatoshis. This will\nONLY be set if this invoice has been settled. We provide this field as if\nthe invoice was created with a zero value, then we need to record what\namount was ultimately accepted. Additionally, it's possible that the sender\npaid MORE that was specified in the original invoice. So we'll record that\nhere as well.\n"
+      }
+    ],
+    "response": [
+      {
+        "name": "r_hash",
+        "type": "bytes",
+        "description": ""
+      },
+      {
+        "name": "payment_request",
+        "type": "string",
+        "description": "A bare-bones invoice for a payment within the Lightning Network.  With the\ndetails of the invoice, the sender has all the data necessary to send a\npayment to the recipient.\n"
+      },
+      {
+        "name": "add_index",
+        "type": "uint64",
+        "description": "The \"add\" index of this invoice. Each newly created invoice will increment\nthis index making it monotonically increasing. Callers to the\nSubscribeInvoices call can use this to instantly get notified of all added\ninvoices with an add_index greater than this one.\n"
+      }
+    ]
+  },
+  "listInvoices": {
+    "description": "ListInvoices returns a list of all the invoices currently stored within the\ndatabase. Any active debug invoices are ignored. It has full support for\npaginated responses, allowing users to query for specific invoices through\ntheir add_index. This can be done by using either the first_index_offset or\nlast_index_offset fields included in the response as the index_offset of the\nnext request. The reversed flag is set by default in order to paginate\nbackwards. If you wish to paginate forwards, you must explicitly set the\nflag to false. If none of the parameters are specified, then the last 100\ninvoices will be returned.\n",
+    "args": [
+      {
+        "name": "pending_only",
+        "type": "bool",
+        "description": "If set, only unsettled invoices will be returned in the response."
+      },
+      {
+        "name": "index_offset",
+        "type": "uint64",
+        "description": "The index of an invoice that will be used as either the start or end of a\nquery to determine which invoices should be returned in the response.\n"
+      },
+      {
+        "name": "num_max_invoices",
+        "type": "uint64",
+        "description": "The max number of invoices to return in the response to this query."
+      },
+      {
+        "name": "reversed",
+        "type": "bool",
+        "description": "If set, the invoices returned will result from seeking backwards from the\nspecified index offset. This can be used to paginate backwards.\n"
+      }
+    ],
+    "response": [
+      {
+        "name": "Invoice",
+        "type": "repeated",
+        "description": "A list of invoices from the time slice of the time series specified in the\nrequest.\n"
+      },
+      {
+        "name": "last_index_offset",
+        "type": "uint64",
+        "description": "The index of the last item in the set of returned invoices. This can be used\nto seek further, pagination style.\n"
+      },
+      {
+        "name": "first_index_offset",
+        "type": "uint64",
+        "description": "The index of the last item in the set of returned invoices. This can be used\nto seek backwards, pagination style.\n"
+      }
+    ]
+  },
+  "lookupInvoice": {
+    "description": "LookupInvoice attempts to look up an invoice according to its payment hash.\nThe passed payment hash *must* be exactly 32 bytes, if not, an error is\nreturned.\n",
+    "args": [
+      {
+        "name": "r_hash_str",
+        "type": "string",
+        "description": "The hex-encoded payment hash of the invoice to be looked up. The passed\npayment hash must be exactly 32 bytes, otherwise an error is returned.\n"
+      },
+      {
+        "name": "r_hash",
+        "type": "bytes",
+        "description": "The payment hash of the invoice to be looked up."
+      }
+    ],
+    "response": [
+      {
+        "name": "memo",
+        "type": "string",
+        "description": "An optional memo to attach along with the invoice. Used for record keeping\npurposes for the invoice's creator, and will also be set in the description\nfield of the encoded payment request if the description_hash field is not\nbeing used.\n"
+      },
+      {
+        "name": "receipt",
+        "type": "bytes",
+        "description": "An optional cryptographic receipt of payment"
+      },
+      {
+        "name": "r_preimage",
+        "type": "bytes",
+        "description": "The hex-encoded preimage (32 byte) which will allow settling an incoming\nHTLC payable to this preimage\n"
+      },
+      {
+        "name": "r_hash",
+        "type": "bytes",
+        "description": "The hash of the preimage"
+      },
+      {
+        "name": "value",
+        "type": "int64",
+        "description": "The value of this invoice in satoshis"
+      },
+      {
+        "name": "settled",
+        "type": "bool",
+        "description": "Whether this invoice has been fulfilled"
+      },
+      {
+        "name": "creation_date",
+        "type": "int64",
+        "description": "When this invoice was created"
+      },
+      {
+        "name": "settle_date",
+        "type": "int64",
+        "description": "When this invoice was settled"
+      },
+      {
+        "name": "payment_request",
+        "type": "string",
+        "description": "A bare-bones invoice for a payment within the Lightning Network.  With the\ndetails of the invoice, the sender has all the data necessary to send a\npayment to the recipient.\n"
+      },
+      {
+        "name": "description_hash",
+        "type": "bytes",
+        "description": "Hash (SHA-256) of a description of the payment. Used if the description of\npayment (memo) is too long to naturally fit within the description field\nof an encoded payment request.\n"
+      },
+      {
+        "name": "expiry",
+        "type": "int64",
+        "description": "Payment request expiry time in seconds. Default is 3600 (1 hour)."
+      },
+      {
+        "name": "fallback_addr",
+        "type": "string",
+        "description": "Fallback on-chain address."
+      },
+      {
+        "name": "cltv_expiry",
+        "type": "uint64",
+        "description": "Delta to use for the time-lock of the CLTV extended to the final hop."
+      },
+      {
+        "name": "RouteHint",
+        "type": "repeated",
+        "description": "Route hints that can each be individually used to assist in reaching the\ninvoice's destination.\n"
+      },
+      {
+        "name": "private",
+        "type": "bool",
+        "description": "Whether this invoice should include routing hints for private channels."
+      },
+      {
+        "name": "add_index",
+        "type": "uint64",
+        "description": "The \"add\" index of this invoice. Each newly created invoice will increment\nthis index making it monotonically increasing. Callers to the\nSubscribeInvoices call can use this to instantly get notified of all added\ninvoices with an add_index greater than this one.\n"
+      },
+      {
+        "name": "settle_index",
+        "type": "uint64",
+        "description": "The \"settle\" index of this invoice. Each newly settled invoice will\nincrement this index making it monotonically increasing. Callers to the\nSubscribeInvoices call can use this to instantly get notified of all\nsettled invoices with an settle_index greater than this one.\n"
+      },
+      {
+        "name": "amt_paid",
+        "type": "int64",
+        "description": "Deprecated, use amt_paid_sat or amt_paid_msat."
+      },
+      {
+        "name": "amt_paid_sat",
+        "type": "int64",
+        "description": "The amount that was accepted for this invoice, in satoshis. This will ONLY\nbe set if this invoice has been settled. We provide this field as if the\ninvoice was created with a zero value, then we need to record what amount\nwas ultimately accepted. Additionally, it's possible that the sender paid\nMORE that was specified in the original invoice. So we'll record that here\nas well.\n"
+      },
+      {
+        "name": "amt_paid_msat",
+        "type": "int64",
+        "description": "The amount that was accepted for this invoice, in millisatoshis. This will\nONLY be set if this invoice has been settled. We provide this field as if\nthe invoice was created with a zero value, then we need to record what\namount was ultimately accepted. Additionally, it's possible that the sender\npaid MORE that was specified in the original invoice. So we'll record that\nhere as well.\n"
+      }
+    ]
+  },
+  "subscribeInvoices": {
+    "description": "SubscribeInvoices returns a uni-directional stream (server -> client) for\nnotifying the client of newly added/settled invoices. The caller can\noptionally specify the add_index and/or the settle_index. If the add_index\nis specified, then we'll first start by sending add invoice events for all\ninvoices with an add_index greater than the specified value.  If the\nsettle_index is specified, the next, we'll send out all settle events for\ninvoices with a settle_index greater than the specified value.  One or both\nof these fields can be set. If no fields are set, then we'll only send out\nthe latest add/settle events.\n",
+    "args": [
+      {
+        "name": "add_index",
+        "type": "uint64",
+        "description": "If specified (non-zero), then we'll first start by sending out\nnotifications for all added indexes with an add_index greater than this\nvalue. This allows callers to catch up on any events they missed while they\nweren't connected to the streaming RPC.\n"
+      },
+      {
+        "name": "settle_index",
+        "type": "uint64",
+        "description": "If specified (non-zero), then we'll first start by sending out\nnotifications for all settled indexes with an settle_index greater than\nthis value. This allows callers to catch up on any events they missed while\nthey weren't connected to the streaming RPC.\n"
+      }
+    ],
+    "response": [
+      {
+        "name": "memo",
+        "type": "string",
+        "description": "An optional memo to attach along with the invoice. Used for record keeping\npurposes for the invoice's creator, and will also be set in the description\nfield of the encoded payment request if the description_hash field is not\nbeing used.\n"
+      },
+      {
+        "name": "receipt",
+        "type": "bytes",
+        "description": "An optional cryptographic receipt of payment"
+      },
+      {
+        "name": "r_preimage",
+        "type": "bytes",
+        "description": "The hex-encoded preimage (32 byte) which will allow settling an incoming\nHTLC payable to this preimage\n"
+      },
+      {
+        "name": "r_hash",
+        "type": "bytes",
+        "description": "The hash of the preimage"
+      },
+      {
+        "name": "value",
+        "type": "int64",
+        "description": "The value of this invoice in satoshis"
+      },
+      {
+        "name": "settled",
+        "type": "bool",
+        "description": "Whether this invoice has been fulfilled"
+      },
+      {
+        "name": "creation_date",
+        "type": "int64",
+        "description": "When this invoice was created"
+      },
+      {
+        "name": "settle_date",
+        "type": "int64",
+        "description": "When this invoice was settled"
+      },
+      {
+        "name": "payment_request",
+        "type": "string",
+        "description": "A bare-bones invoice for a payment within the Lightning Network.  With the\ndetails of the invoice, the sender has all the data necessary to send a\npayment to the recipient.\n"
+      },
+      {
+        "name": "description_hash",
+        "type": "bytes",
+        "description": "Hash (SHA-256) of a description of the payment. Used if the description of\npayment (memo) is too long to naturally fit within the description field\nof an encoded payment request.\n"
+      },
+      {
+        "name": "expiry",
+        "type": "int64",
+        "description": "Payment request expiry time in seconds. Default is 3600 (1 hour)."
+      },
+      {
+        "name": "fallback_addr",
+        "type": "string",
+        "description": "Fallback on-chain address."
+      },
+      {
+        "name": "cltv_expiry",
+        "type": "uint64",
+        "description": "Delta to use for the time-lock of the CLTV extended to the final hop."
+      },
+      {
+        "name": "RouteHint",
+        "type": "repeated",
+        "description": "Route hints that can each be individually used to assist in reaching the\ninvoice's destination.\n"
+      },
+      {
+        "name": "private",
+        "type": "bool",
+        "description": "Whether this invoice should include routing hints for private channels."
+      },
+      {
+        "name": "add_index",
+        "type": "uint64",
+        "description": "The \"add\" index of this invoice. Each newly created invoice will increment\nthis index making it monotonically increasing. Callers to the\nSubscribeInvoices call can use this to instantly get notified of all added\ninvoices with an add_index greater than this one.\n"
+      },
+      {
+        "name": "settle_index",
+        "type": "uint64",
+        "description": "The \"settle\" index of this invoice. Each newly settled invoice will\nincrement this index making it monotonically increasing. Callers to the\nSubscribeInvoices call can use this to instantly get notified of all\nsettled invoices with an settle_index greater than this one.\n"
+      },
+      {
+        "name": "amt_paid",
+        "type": "int64",
+        "description": "Deprecated, use amt_paid_sat or amt_paid_msat."
+      },
+      {
+        "name": "amt_paid_sat",
+        "type": "int64",
+        "description": "The amount that was accepted for this invoice, in satoshis. This will ONLY\nbe set if this invoice has been settled. We provide this field as if the\ninvoice was created with a zero value, then we need to record what amount\nwas ultimately accepted. Additionally, it's possible that the sender paid\nMORE that was specified in the original invoice. So we'll record that here\nas well.\n"
+      },
+      {
+        "name": "amt_paid_msat",
+        "type": "int64",
+        "description": "The amount that was accepted for this invoice, in millisatoshis. This will\nONLY be set if this invoice has been settled. We provide this field as if\nthe invoice was created with a zero value, then we need to record what\namount was ultimately accepted. Additionally, it's possible that the sender\npaid MORE that was specified in the original invoice. So we'll record that\nhere as well.\n"
+      }
+    ]
+  },
+  "decodePayReq": {
+    "description": "DecodePayReq takes an encoded payment request string and attempts to decode\nit, returning a full description of the conditions encoded within the\npayment request.\n",
+    "args": [
+      {
+        "name": "pay_req",
+        "type": "string",
+        "description": "The payment request string to be decoded"
+      }
+    ],
+    "response": [
+      {
+        "name": "destination",
+        "type": "string",
+        "description": ""
+      },
+      {
+        "name": "payment_hash",
+        "type": "string",
+        "description": ""
+      },
+      {
+        "name": "num_satoshis",
+        "type": "int64",
+        "description": ""
+      },
+      {
+        "name": "timestamp",
+        "type": "int64",
+        "description": ""
+      },
+      {
+        "name": "expiry",
+        "type": "int64",
+        "description": ""
+      },
+      {
+        "name": "description",
+        "type": "string",
+        "description": ""
+      },
+      {
+        "name": "description_hash",
+        "type": "string",
+        "description": ""
+      },
+      {
+        "name": "fallback_addr",
+        "type": "string",
+        "description": ""
+      },
+      {
+        "name": "cltv_expiry",
+        "type": "int64",
+        "description": ""
+      },
+      {
+        "name": "RouteHint",
+        "type": "repeated",
+        "description": ""
+      }
+    ]
+  },
+  "listPayments": {
+    "description": "ListPayments returns a list of all outgoing payments.\n",
+    "args": [],
+    "response": [
+      {
+        "name": "Payment",
+        "type": "repeated",
+        "description": "The list of payments"
+      }
+    ]
+  },
+  "deleteAllPayments": {
+    "description": "DeleteAllPayments deletes all outgoing payments from DB.\n",
+    "args": [],
+    "response": []
+  },
+  "describeGraph": {
+    "description": "DescribeGraph returns a description of the latest graph state from the\npoint of view of the node. The graph information is partitioned into two\ncomponents: all the nodes/vertexes, and all the edges that connect the\nvertexes themselves.  As this is a directed graph, the edges also contain\nthe node directional specific routing policy which includes: the time lock\ndelta, fee information, etc.\n",
+    "args": [
+      {
+        "name": "include_unannounced",
+        "type": "bool",
+        "description": "Whether unannounced channels are included in the response or not. If set,\nunannounced channels are included. Unannounced channels are both private\nchannels, and public channels that are not yet announced to the network.\n"
+      }
+    ],
+    "response": [
+      {
+        "name": "LightningNode",
+        "type": "repeated",
+        "description": "The list of `LightningNode`s in this channel graph"
+      },
+      {
+        "name": "ChannelEdge",
+        "type": "repeated",
+        "description": "The list of `ChannelEdge`s in this channel graph"
+      }
+    ]
+  },
+  "getChanInfo": {
+    "description": "GetChanInfo returns the latest authenticated network announcement for the\ngiven channel identified by its channel ID: an 8-byte integer which\nuniquely identifies the location of transaction's funding output within the\nblockchain.\n",
+    "args": [
+      {
+        "name": "chan_id",
+        "type": "uint64",
+        "description": "The unique channel ID for the channel. The first 3 bytes are the block\nheight, the next 3 the index within the block, and the last 2 bytes are the\noutput index for the channel.\n"
+      }
+    ],
+    "response": [
+      {
+        "name": "channel_id",
+        "type": "uint64",
+        "description": "The unique channel ID for the channel. The first 3 bytes are the block\nheight, the next 3 the index within the block, and the last 2 bytes are the\noutput index for the channel.\n"
+      },
+      {
+        "name": "chan_point",
+        "type": "string",
+        "description": ""
+      },
+      {
+        "name": "last_update",
+        "type": "uint32",
+        "description": ""
+      },
+      {
+        "name": "node",
+        "type": "string",
+        "description": ""
+      },
+      {
+        "name": "node",
+        "type": "string",
+        "description": ""
+      },
+      {
+        "name": "capacity",
+        "type": "int64",
+        "description": ""
+      },
+      {
+        "name": "node",
+        "type": "RoutingPolicy",
+        "description": ""
+      },
+      {
+        "name": "node",
+        "type": "RoutingPolicy",
+        "description": ""
+      }
+    ]
+  },
+  "getNodeInfo": {
+    "description": "GetNodeInfo returns the latest advertised, aggregated, and authenticated\nchannel information for the specified node identified by its public key.\n",
+    "args": [
+      {
+        "name": "pub_key",
+        "type": "string",
+        "description": "The 33-byte hex-encoded compressed public of the target node "
+      }
+    ],
+    "response": [
+      {
+        "name": "node",
+        "type": "LightningNode",
+        "description": "An individual vertex/node within the channel graph. A node is\nconnected to other nodes by one or more channel edges emanating from it. As\nthe graph is directed, a node will also have an incoming edge attached to\nit for each outgoing edge.\n"
+      },
+      {
+        "name": "num_channels",
+        "type": "uint32",
+        "description": ""
+      },
+      {
+        "name": "total_capacity",
+        "type": "int64",
+        "description": ""
+      }
+    ]
+  },
+  "queryRoutes": {
+    "description": "QueryRoutes attempts to query the daemon's Channel Router for a possible\nroute to a target destination capable of carrying a specific amount of\nsatoshis. The retuned route contains the full details required to craft and\nsend an HTLC, also including the necessary information that should be\npresent within the Sphinx packet encapsulated within the HTLC.\n",
+    "args": [
+      {
+        "name": "pub_key",
+        "type": "string",
+        "description": "The 33-byte hex-encoded public key for the payment destination"
+      },
+      {
+        "name": "amt",
+        "type": "int64",
+        "description": "The amount to send expressed in satoshis"
+      },
+      {
+        "name": "num_routes",
+        "type": "int32",
+        "description": "The max number of routes to return."
+      },
+      {
+        "name": "final_cltv_delta",
+        "type": "int32",
+        "description": "An optional CLTV delta from the current height that should be used for the timelock of the final hop"
+      },
+      {
+        "name": "fee_limit",
+        "type": "FeeLimit",
+        "description": "The maximum number of satoshis that will be paid as a fee of the payment.\nThis value can be represented either as a percentage of the amount being\nsent, or as a fixed amount of the maximum fee the user is willing the pay to\nsend the payment.\n"
+      }
+    ],
+    "response": [
+      {
+        "name": "Route",
+        "type": "repeated",
+        "description": ""
+      }
+    ]
+  },
+  "getNetworkInfo": {
+    "description": "GetNetworkInfo returns some basic stats about the known channel graph from\nthe point of view of the node.\n",
+    "args": [],
+    "response": [
+      {
+        "name": "graph_diameter",
+        "type": "uint32",
+        "description": ""
+      },
+      {
+        "name": "avg_out_degree",
+        "type": "double",
+        "description": ""
+      },
+      {
+        "name": "max_out_degree",
+        "type": "uint32",
+        "description": ""
+      },
+      {
+        "name": "num_nodes",
+        "type": "uint32",
+        "description": ""
+      },
+      {
+        "name": "num_channels",
+        "type": "uint32",
+        "description": ""
+      },
+      {
+        "name": "total_network_capacity",
+        "type": "int64",
+        "description": ""
+      },
+      {
+        "name": "avg_channel_size",
+        "type": "double",
+        "description": ""
+      },
+      {
+        "name": "min_channel_size",
+        "type": "int64",
+        "description": ""
+      },
+      {
+        "name": "max_channel_size",
+        "type": "int64",
+        "description": ""
+      },
+      {
+        "name": "rate",
+        "type": "fee",
+        "description": ""
+      },
+      {
+        "name": "additional",
+        "type": "also",
+        "description": ""
+      }
+    ]
+  },
+  "stopDaemon": {
+    "description": "StopDaemon will send a shutdown request to the interrupt handler, triggering\na graceful shutdown of the daemon.\n",
+    "args": [],
+    "response": []
+  },
+  "subscribeChannelGraph": {
+    "description": "SubscribeChannelGraph launches a streaming RPC that allows the caller to\nreceive notifications upon any changes to the channel graph topology from\nthe point of view of the responding node. Events notified include: new\nnodes coming online, nodes updating their authenticated attributes, new\nchannels being advertised, updates in the routing policy for a directional\nchannel edge, and when channels are closed on-chain.\n",
+    "args": [],
+    "response": [
+      {
+        "name": "NodeUpdate",
+        "type": "repeated",
+        "description": ""
+      },
+      {
+        "name": "ChannelEdgeUpdate",
+        "type": "repeated",
+        "description": ""
+      },
+      {
+        "name": "ClosedChannelUpdate",
+        "type": "repeated",
+        "description": ""
+      }
+    ]
+  },
+  "debugLevel": {
+    "description": "DebugLevel allows a caller to programmatically set the logging verbosity of\nlnd. The logging can be targeted according to a coarse daemon-wide logging\nlevel, or in a granular fashion to specify the logging for a target\nsub-system.\n",
+    "args": [
+      {
+        "name": "show",
+        "type": "bool",
+        "description": ""
+      },
+      {
+        "name": "level_spec",
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "response": [
+      {
+        "name": "sub_systems",
+        "type": "string",
+        "description": ""
+      }
+    ]
+  },
+  "feeReport": {
+    "description": "FeeReport allows the caller to obtain a report detailing the current fee\nschedule enforced by the node globally for each channel.\n",
+    "args": [],
+    "response": [
+      {
+        "name": "ChannelFeeReport",
+        "type": "repeated",
+        "description": "An array of channel fee reports which describes the current fee schedule for each channel."
+      },
+      {
+        "name": "day_fee_sum",
+        "type": "uint64",
+        "description": "The total amount of fee revenue (in satoshis) the switch has collected over the past 24 hrs."
+      },
+      {
+        "name": "week_fee_sum",
+        "type": "uint64",
+        "description": "The total amount of fee revenue (in satoshis) the switch has collected over the past 1 week."
+      },
+      {
+        "name": "month_fee_sum",
+        "type": "uint64",
+        "description": "The total amount of fee revenue (in satoshis) the switch has collected over the past 1 month."
+      }
+    ]
+  },
+  "updateChannelPolicy": {
+    "description": "UpdateChannelPolicy allows the caller to update the fee schedule and\nchannel policies for all channels globally, or a particular channel.\n",
+    "args": [
+      {
+        "name": "scope",
+        "type": "oneof",
+        "description": ""
+      },
+      {
+        "name": "global",
+        "type": "bool",
+        "description": "If set, then this update applies to all currently active channels."
+      },
+      {
+        "name": "chan_point",
+        "type": "ChannelPoint",
+        "description": "If set, this update will target a specific channel."
+      },
+      {
+        "name": "base_fee_msat",
+        "type": "int64",
+        "description": "The base fee charged regardless of the number of milli-satoshis sent."
+      },
+      {
+        "name": "fee_rate",
+        "type": "double",
+        "description": "The effective fee rate in milli-satoshis. The precision of this value goes up to 6 decimal places, so 1e-6."
+      },
+      {
+        "name": "time_lock_delta",
+        "type": "uint32",
+        "description": "The required timelock delta for HTLCs forwarded over the channel."
+      }
+    ],
+    "response": []
+  },
+  "forwardingHistory": {
+    "description": "ForwardingHistory allows the caller to query the htlcswitch for a record of\nall HTLC's forwarded within the target time range, and integer offset\nwithin that time range. If no time-range is specified, then the first chunk\nof the past 24 hrs of forwarding history are returned.\n\nA list of forwarding events are returned. The size of each forwarding event\nis 40 bytes, and the max message size able to be returned in gRPC is 4 MiB.\nAs a result each message can only contain 50k entries.  Each response has\nthe index offset of the last entry. The index offset can be provided to the\nrequest to allow the caller to skip a series of records.\n",
+    "args": [
+      {
+        "name": "start_time",
+        "type": "uint64",
+        "description": "Start time is the starting point of the forwarding history request. All records beyond this point will be included, respecting the end time, and the index offset."
+      },
+      {
+        "name": "end_time",
+        "type": "uint64",
+        "description": "End time is the end point of the forwarding history request. The response will carry at most 50k records between the start time and the end time. The index offset can be used to implement pagination."
+      },
+      {
+        "name": "index_offset",
+        "type": "uint32",
+        "description": "Index offset is the offset in the time series to start at. As each response can only contain 50k records, callers can use this to skip around within a packed time series."
+      },
+      {
+        "name": "num_max_events",
+        "type": "uint32",
+        "description": "The max number of events to return in the response to this query."
+      }
+    ],
+    "response": [
+      {
+        "name": "ForwardingEvent",
+        "type": "repeated",
+        "description": "A list of forwarding events from the time slice of the time series specified in the request."
+      },
+      {
+        "name": "last_offset_index",
+        "type": "uint32",
+        "description": "The index of the last time in the set of returned forwarding events. Can be used to seek further, pagination style."
+      }
+    ]
   }
+}

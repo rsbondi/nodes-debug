@@ -7,12 +7,6 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/app.js"
-        },
-        {
-            "type": "node",
-            "request": "launch",
             "name": "Build nodetypes",
             "program": "${workspaceFolder}/.nodetypes/index.js",
             "args": [],

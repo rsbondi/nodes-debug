@@ -3,15 +3,15 @@ const { BitcoinController } = require('../bitcoin/BitcoinController')
 const path = require('path')
 const Config = require('./config')
 const grpc = require('grpc');
+const protoLoader = require('@grpc/proto-loader')
+process.env.GRPC_SSL_CIPHER_SUITES = 'HIGH+ECDSA'
+
 const MonacoHandler = require('./monaco')
 
 class LndController {
     constructor(cfg) {
-        // super({})
         this.update(cfg)
     }
-
-    // ping, execute, getConsole from base
 
     static register(editor, resultEditor, store) {
         this.models = {}
@@ -34,8 +34,8 @@ class LndController {
     update(cfg) {
         this.id = cfg.index
         this._config = new Config(cfg)
-        function setupGrpc() {
-
+        const setupGrpc = () => {
+            let instance = this._createInstance()
         }
         
         setupGrpc()
@@ -57,6 +57,35 @@ class LndController {
             command: monaco.editor.createModel('', this.constructor.lang),
             result:  monaco.editor.createModel('', 'javascript')
         }
+    }
+
+    _createInstance() {
+        const m = fs.readFileSync(this._config.macaroonPath);
+        const macaroon = m.toString('hex');
+        
+        let metadata = new grpc.Metadata()
+        metadata.add('macaroon', macaroon)
+        const macaroonCreds = grpc.credentials.createFromMetadataGenerator((_args, callback) => {
+            callback(null, metadata);
+        });
+        
+        const lndCert = fs.readFileSync(this._config.certPath);
+        const sslCreds = grpc.credentials.createSsl(lndCert);
+        
+        const credentials = grpc.credentials.combineChannelCredentials(sslCreds, macaroonCreds);
+        
+        const packageDefinition = protoLoader.loadSync(`${__dirname}/rpc.proto`);
+
+        const lnrpcDescriptor = grpc.loadPackageDefinition(packageDefinition);
+        //const loadPackageDefinition
+        const lnrpc = lnrpcDescriptor.lnrpc;
+        const instance = new lnrpc.Lightning(`${this._config.host}:${this._config.port}`, credentials);
+        instance.listPeers({}, function (err, response) {
+            console.log('Peers:', JSON.stringify(response));
+        });
+
+        //return instance
+    
     }
 
     _postRPC() {
