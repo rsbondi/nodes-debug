@@ -14,7 +14,6 @@ class LndController {
     }
 
     static register(editor, resultEditor, store) {
-        this.models = {}
         return MonacoHandler.register(editor, resultEditor, store, this.lang)
     }
 
@@ -45,8 +44,8 @@ class LndController {
 
     getConsole() {
         return new Promise((resolve, reject) => {
-            if(!this.constructor.models[this.id]) this._createConsole()
-            resolve(this.constructor.models[this.id])
+            if(!MonacoHandler.models[this.id]) this._createConsole()
+            resolve(MonacoHandler.models[this.id])
         })
     }
 
@@ -63,12 +62,12 @@ class LndController {
           let content = '// '+method+' '+(params ? JSON.stringify(params):'') + '\n'
           content += JSON.stringify(response, null, 2) + '\n\n'
           this.constructor._appendToEditor(content)
-        }).catch(err => console.log)
+        }).catch(err => this.constructor._appendToEditor(err))
         return null;
     }
 
     _createConsole() {
-        this.constructor.models[this.id] = {
+        MonacoHandler.models[this.id] = {
             command: monaco.editor.createModel('', this.constructor.lang),
             result:  monaco.editor.createModel('', 'javascript')
         }
@@ -113,7 +112,7 @@ class LndController {
         .then(d => { this.online = true; return d})
         .catch(e => {
             this.online = false
-            return e.response
+            return e
         })
 
         return promise
