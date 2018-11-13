@@ -34,8 +34,9 @@ class LndController {
     update(cfg) {
         this.id = cfg.index
         this._config = new Config(cfg)
+        
         const setupGrpc = () => {
-            let instance = this._createInstance()
+            this.instance = this._createInstance()
         }
         
         setupGrpc()
@@ -49,8 +50,22 @@ class LndController {
         })
     }
 
-    ping() { return this._postRPC({method: 'ping'})}
+    ping() { return this._postRPC('getInfo')}
 
+    execute(ed) {
+        const val = this.constructor._getCommandBlock(ed.getModel(), ed.getPosition()).map(b => b.text).join(' ')
+        console.log(val)
+        let chunks = val.split(/\s/)
+        const method = chunks[0]
+        let params = chunks.length > 1 ? JSON.parse(val.slice(chunks[0].length)) : {}
+
+        this._postRPC(method, params).then(response => {
+          let content = '// '+method+' '+(params ? JSON.stringify(params):'') + '\n'
+          content += JSON.stringify(response, null, 2) + '\n\n'
+          this.constructor._appendToEditor(content)
+        }).catch(err => console.log)
+        return null;
+    }
 
     _createConsole() {
         this.constructor.models[this.id] = {
@@ -77,22 +92,79 @@ class LndController {
         const packageDefinition = protoLoader.loadSync(`${__dirname}/rpc.proto`);
 
         const lnrpcDescriptor = grpc.loadPackageDefinition(packageDefinition);
-        //const loadPackageDefinition
         const lnrpc = lnrpcDescriptor.lnrpc;
         const instance = new lnrpc.Lightning(`${this._config.host}:${this._config.port}`, credentials);
-        instance.listPeers({}, function (err, response) {
-            console.log('Peers:', JSON.stringify(response));
-        });
 
-        //return instance
+        return instance
     
     }
 
-    _postRPC() {
-        return new Promise((resolve, reject) => {
-            resolve({})
+    _postRPC(method, options, id) {
+        var promiseFunction = (resolve, reject) => {
+            try {
+                this.instance[method](options || {}, (err, result) => {
+                    if (err) reject(err)
+                    else resolve(result)
+                });
+            } catch(e) {reject(e.message)}
+        }
+
+        let promise = new Promise(promiseFunction)        
+        .then(d => { this.online = true; return d})
+        .catch(e => {
+            this.online = false
+            return e.response
         })
+
+        return promise
+        
+
     }
+
+    static _getCommandBlock (model, position) {
+        let line = position.lineNumber, wordAtPos, word = ''
+        let block = model.getLineContent(line) ? [] : [{text:''}] // keep block alive on enter
+        let tmpline
+        while(tmpline = model.getLineContent(line)) {
+            wordAtPos = model.getWordAtPosition({lineNumber: line, column: 1})
+            block.unshift({text: model.getLineContent(line), offset: line - position.lineNumber})
+            if(wordAtPos) word = wordAtPos.word
+            if(word) {
+                if(~Object.keys(MonacoHandler._commands).indexOf(word)) break;
+            }
+            line--
+            if(line===0) break
+        }
+        line = position.lineNumber + 1
+        if(line > model.getLineCount()) return block
+        while(tmpline = model.getLineContent(line)) {
+            wordAtPos = model.getWordAtPosition({lineNumber: line, column: 1})
+            if(wordAtPos && ~Object.keys(MonacoHandler._commands).indexOf(wordAtPos.word)) break;
+            tmpline = tmpline.replace(/^\s+/,'')
+            if(!tmpline) break;
+            block.push({text: model.getLineContent(line), offset: line - position.lineNumber})
+            line++
+            if(line > model.getLineCount()) break
+        }
+        return block
+    }
+
+    static _appendToEditor (text)  {
+        const lineCount = MonacoHandler.resultEditor.getModel().getLineCount();
+        const lastLineLength = MonacoHandler.resultEditor.getModel().getLineMaxColumn(lineCount);
+    
+        const range = new monaco.Range(lineCount, lastLineLength, lineCount, lastLineLength);
+    
+        MonacoHandler.resultEditor.updateOptions({ readOnly: false })
+        MonacoHandler.resultEditor.executeEdits('', [
+        { range: range, text: text }
+        ])
+        MonacoHandler.resultEditor.updateOptions({ readOnly: true })
+        MonacoHandler.resultEditor.setSelection(new monaco.Range(1, 1, 1, 1))
+        MonacoHandler.resultEditor.revealPosition({ lineNumber: MonacoHandler.resultEditor.getModel().getLineCount(), column: 0 })
+                
+    }
+
 
 }
 
