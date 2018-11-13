@@ -61,13 +61,11 @@ class MonacoHandler {
                     ],
                 });
                 
-                console.log('register hover', this.lang)
                 monaco.languages.registerHoverProvider(this.lang, {
                     provideHover:  (model, position) => {
                         let word = ''
                         const wordAtPos = model.getWordAtPosition(position)
                         if (wordAtPos) word = wordAtPos.word
-                        console.log('hover',word)
 
                         if (word && ~Object.keys(this._commands).indexOf(word)) {
                             const cmd = this._commands[word]
@@ -129,11 +127,9 @@ class MonacoHandler {
                         var token = tokens[0].filter(t => t.offset == (position.column-2))
                         if(token.length && token[0].type == "string.key.json") {
                             for(var l=position.lineNumber; l>0; l--) {
-                                console.log(tokens, ''+(position.column-2), l)
                                 const word = model.getWordAtPosition({
                                     lineNumber: l, column: 1})
                                 const keys = Object.keys(this._commands)
-                                console.log('word', word, keys)
                                 if(word && ~keys.indexOf(word.word)) {
                                     return this._commands[word.word].args.map(a => {
                                         return {

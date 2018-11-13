@@ -2,7 +2,7 @@ const fs = require('fs')
 const { BitcoinController } = require('../bitcoin/BitcoinController')
 const path = require('path')
 const Config = require('./config')
-//const grpc = require('grpc');
+const grpc = require('grpc');
 const MonacoHandler = require('./monaco')
 
 class LndController {
