@@ -4,7 +4,17 @@ const path = require('path')
 const Config = require('./config')
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader')
-process.env.GRPC_SSL_CIPHER_SUITES = 'HIGH+ECDSA'
+//process.env.GRPC_SSL_CIPHER_SUITES = 'HIGH+ECDSA'
+
+process.env.GRPC_SSL_CIPHER_SUITES =
+  'ECDHE-RSA-AES128-GCM-SHA256:' +
+  'ECDHE-RSA-AES128-SHA256:' +
+  'ECDHE-RSA-AES256-SHA384:' +
+  'ECDHE-RSA-AES256-GCM-SHA384:' +
+  'ECDHE-ECDSA-AES128-GCM-SHA256:' +
+  'ECDHE-ECDSA-AES128-SHA256:' +
+  'ECDHE-ECDSA-AES256-SHA384:' +
+  'ECDHE-ECDSA-AES256-GCM-SHA384';
 
 const MonacoHandler = require('./monaco')
 
@@ -88,9 +98,15 @@ class LndController {
         
         const credentials = grpc.credentials.combineChannelCredentials(sslCreds, macaroonCreds);
         
-        const packageDefinition = protoLoader.loadSync(`${__dirname}/rpc.proto`);
+        const packageDefinition = protoLoader.loadSync(`${__dirname}/rpc.proto`,{keepCase: true,
+            longs: String,
+            enums: String,
+            defaults: true,
+            oneofs: true
+           });
 
         const lnrpcDescriptor = grpc.loadPackageDefinition(packageDefinition);
+        
         const lnrpc = lnrpcDescriptor.lnrpc;
         const instance = new lnrpc.Lightning(`${this._config.host}:${this._config.port}`, credentials);
 
@@ -100,8 +116,9 @@ class LndController {
 
     _postRPC(method, options, id) {
         var promiseFunction = (resolve, reject) => {
+            let opts = options || {}
             try {
-                this.instance[method](options || {}, (err, result) => {
+                this.instance[method](opts, (err, result) => {
                     if (err) reject(err)
                     else resolve(result)
                 });

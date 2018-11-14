@@ -5,7 +5,7 @@
   "main": "LndController.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "npm install grpc@1.16.0 --runtime=electron --target=1.8.8"
+    "postinstall": "npm install grpc@1.16.0 --runtime=electron --target=3.0.9"
   },
   "keywords": [
     "lnd",
