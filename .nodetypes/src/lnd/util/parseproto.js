@@ -38,7 +38,7 @@ lines.forEach(l => {
     if(inmsg) {
         const comment = l.match(/\/\/\/ (.+)/)
         if(comment) description = comment[1]
-        const field = l.match(/([a-zA-Z0-9]+) ([a-zA-Z_]+)/)
+        const field = l.match(/([a-zA-Z0-9]+) ([a-zA-Z_]+)\s?=/)
         if(field && field[1]!='message' && !incomment && !comment) {
             if(field[1]=='enum') {
                 inenum = true
@@ -71,6 +71,11 @@ Object.keys(commands).forEach(k => {
     let c = commands[k]
     c.args = messages[c.request].fields
     // TODO: loop through fields and check for messages for type, then what?
+    c.args.forEach(a => {
+        if(messages[a.type]) {
+            a.args = messages[a.type].fields.filter(f => f.type != 'oneof')
+        }
+    })
     c.response = messages[c.returns].fields
 
     delete c.request; delete c.returns

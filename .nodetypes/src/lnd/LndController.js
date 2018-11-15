@@ -7,8 +7,6 @@ const protoLoader = require('@grpc/proto-loader')
 //process.env.GRPC_SSL_CIPHER_SUITES = 'HIGH+ECDSA'
 
 // TODO: parse enums
-// TODO: identify streaming in parse and handle in code
-// TODO: identify walletUnloker service commands and handle
 
 process.env.GRPC_SSL_CIPHER_SUITES =
   'ECDHE-RSA-AES128-GCM-SHA256:' +

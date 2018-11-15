@@ -131,6 +131,40 @@ class MonacoHandler {
                                     lineNumber: l, column: 1})
                                 const keys = Object.keys(this._commands)
                                 if(word && ~keys.indexOf(word.word)) {
+
+                                    // here I have the command, need to check if any args have args
+                                    // loop back again from position and check against args
+                                    // if found, return its args and not commands args
+
+                                    const argargs = this._commands[word.word].args.filter(a => a.args)
+
+                                    if(argargs.length) {
+                                        const block = model.getValueInRange({
+                                            startColumn: 1, startLineNumber: l, endColumn: position.column, endLineNumber: position.lineNumber
+                                        })
+                                        const re = /("([^"]|"")*")/g
+                                        let m = block.match(re)
+                                        if(m) {
+                                            const argnames = argargs.map(a => a.name)
+                                            m = m.filter(f => ~argnames.indexOf(f.replace(/"/g, '')))
+                                            if(m.length) {
+                                                const key = m[m.length-1].replace(/"/g, '')
+                                                const keyIndex = block.indexOf(m[m.length-1])
+                                                const lastBrace = block.lastIndexOf("}")
+                                                if((lastBrace==-1 || keyIndex > lastBrace) && ~argnames.indexOf(key))
+                                                    return this._commands[word.word].args.filter(a => a.name == key)[0].args.map(a => {
+                                                        return {
+                                                            label: a.name,
+                                                            insertText: a.name,
+                                                            detail: a.type,
+                                                            documentation: a.description
+                                                        }
+                                                    })
+                                            }
+                                        }
+                                        console.log('complete from block', m)
+                                    }
+
                                     return this._commands[word.word].args.map(a => {
                                         return {
                                             label: a.name,
@@ -139,7 +173,6 @@ class MonacoHandler {
                                             documentation: a.description
                                         }
                                     })
-                                    break
                                 }
                             }
                         }
