@@ -2,7 +2,7 @@
 
 const fs = require('fs')
 
-const proto = fs.readFileSync(`${__dirname}/rpc.proto`).toString('utf8')
+const proto = fs.readFileSync(`${__dirname}/../rpc.proto`).toString('utf8')
 
 const lines = proto.split("\n")
 
@@ -14,11 +14,20 @@ let currentMsg = ""
 let description = ""
 let incomment = false
 
+let currentService = ''
+
 lines.forEach(l => {
     const rpc = l.match(/rpc ([a-zA-Z]+)\s?\((stream )?([a-zA-Z]+)\) returns \((stream )?([a-zA-Z]+)\)/)
     if(rpc) {
-        commands[rpc[1].slice(0, 1).toLowerCase()+rpc[1].slice(1)] = {request: rpc[3], returns: rpc[5], description: description}
+        // TODO: if rpc[4] add flag to command to handle differently in code
+        // TODO: if rpc[3] maybe ? save to quick pick for write ?
+        commands[rpc[1].slice(0, 1).toLowerCase()+rpc[1].slice(1)] = {
+            request: rpc[3], returns: rpc[5], description: description, service: currentService
+        }
     }
+
+    const service = l.match(/^service\s+([a-zA-Z_]+)/)
+    if(service) currentService = service[1]
 
     const uncom = l.match(/\*\//)
     if(uncom) incomment = false
@@ -59,6 +68,7 @@ lines.forEach(l => {
 Object.keys(commands).forEach(k => {
     let c = commands[k]
     c.args = messages[c.request].fields
+    // TODO: loop through fields and check for messages for type, then what?
     c.response = messages[c.returns].fields
 
     delete c.request; delete c.returns

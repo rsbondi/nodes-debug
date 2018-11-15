@@ -6,6 +6,10 @@ const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader')
 //process.env.GRPC_SSL_CIPHER_SUITES = 'HIGH+ECDSA'
 
+// TODO: parse enums
+// TODO: identify streaming in parse and handle in code
+// TODO: identify walletUnloker service commands and handle
+
 process.env.GRPC_SSL_CIPHER_SUITES =
   'ECDHE-RSA-AES128-GCM-SHA256:' +
   'ECDHE-RSA-AES128-SHA256:' +
@@ -27,8 +31,7 @@ class LndController {
         return MonacoHandler.register(editor, resultEditor, store, this.lang)
     }
 
-
-    getInfo() {
+        getInfo() {
         return new Promise((resolve, reject) => {
             resolve({})
         })
@@ -63,12 +66,22 @@ class LndController {
 
     execute(ed) {
         const val = this.constructor._getCommandBlock(ed.getModel(), ed.getPosition()).map(b => b.text).join(' ')
-        console.log(val)
         let chunks = val.split(/\s/)
         const method = chunks[0]
-        let params = chunks.length > 1 ? JSON.parse(val.slice(chunks[0].length)) : {}
+        if(!~Object.keys(MonacoHandler._commands).indexOf(method)) {
+            this.constructor._appendToEditor(`unknown method, ${method}`)
+            return
+        }
+        const service = MonacoHandler._commands[method].service
+        let params 
+        try {
+            params = chunks.length > 1 ? JSON.parse(val.slice(chunks[0].length)) : {}
+        } catch (e) {
+            this.constructor._appendToEditor(e+"\n")
+            return
+        }
 
-        this._postRPC(method, params).then(response => {
+        this._postRPC(method, params, service).then(response => {
           let content = '// '+method+' '+(params ? JSON.stringify(params):'') + '\n'
           content += JSON.stringify(response, null, 2) + '\n\n'
           this.constructor._appendToEditor(content)
@@ -105,20 +118,30 @@ class LndController {
             oneofs: true
            });
 
-        const lnrpcDescriptor = grpc.loadPackageDefinition(packageDefinition);
+        let lnrpcDescriptor = grpc.loadPackageDefinition(packageDefinition);
         
         const lnrpc = lnrpcDescriptor.lnrpc;
         const instance = new lnrpc.Lightning(`${this._config.host}:${this._config.port}`, credentials);
 
-        return instance
+        lnrpcDescriptor = grpc.loadPackageDefinition(packageDefinition);
+        const wlnrpc = lnrpcDescriptor.lnrpc;
+        const winstance = new wlnrpc.WalletUnlocker(`${this._config.host}:${this._config.port}`, sslCreds);
+
+        return {Lightning: instance, WalletUnlocker: winstance}
     
     }
 
-    _postRPC(method, options, id) {
+    _postRPC(method, options, service) {
+        if(!service) service='Lightning'
+        let encoding = service == 'Lightning' ? 'hex': 'utf8' // TODO: sign/verifyMessage utf8
         var promiseFunction = (resolve, reject) => {
-            let opts = options || {}
+            let opts = Object.assign({}, options || {})
+            Object.keys(opts).forEach(k => {
+                const opt = MonacoHandler._commands[method].args.filter(a => a.name == k)
+                if(opt.length && opt[0].type == 'bytes') opts[k] = Buffer.from(opts[k], encoding)
+            })
             try {
-                this.instance[method](opts, (err, result) => {
+                this.instance[service][method](opts, (err, result) => {
                     if (err) reject(err)
                     else resolve(result)
                 });
