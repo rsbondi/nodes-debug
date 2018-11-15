@@ -23,6 +23,7 @@ const MonacoHandler = require('./monaco')
 class LndController {
     constructor(cfg) {
         this.update(cfg)
+        this.noservice = false
     }
 
     static register(editor, resultEditor, store) {
@@ -63,6 +64,13 @@ class LndController {
     ping() { return this._postRPC('getInfo')}
 
     execute(ed) {
+        if(this.noservice) {
+            this.instance = this._createInstance()
+            setTimeout(() => {
+                this.execute(ed)
+            }, 1000)
+            return
+        }
         const val = this.constructor._getCommandBlock(ed.getModel(), ed.getPosition()).map(b => b.text).join(' ')
         let chunks = val.split(/\s/)
         const method = chunks[0]
@@ -125,6 +133,7 @@ class LndController {
         const wlnrpc = lnrpcDescriptor.lnrpc;
         const winstance = new wlnrpc.WalletUnlocker(`${this._config.host}:${this._config.port}`, sslCreds);
 
+        this.noservice = false
         return {Lightning: instance, WalletUnlocker: winstance}
     
     }
@@ -155,7 +164,13 @@ class LndController {
                       });                
                 } else {
                     this.instance[service][method](opts, (err, result) => {
-                        if (err) reject(err)
+                        if (err) {
+                                
+                            if(err.details == "unknown service lnrpc.Lightning") {
+                                this.noservice = true
+                            }
+                            reject(err)
+                        }
                         else resolve(result)
                     });
                 }
