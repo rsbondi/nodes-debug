@@ -175,6 +175,7 @@
   "subscribeTransactions": {
     "description": "SubscribeTransactions creates a uni-directional stream from the server to\nthe client in which any newly discovered transactions relevant to the\nwallet are sent over.\n",
     "service": "Lightning",
+    "stream": true,
     "args": [],
     "response": [
       {
@@ -585,6 +586,7 @@
   "openChannel": {
     "description": "OpenChannel attempts to open a singly funded channel specified in the\nrequest to a remote peer. Users are able to specify a target number of\nblocks that the funding transaction should be confirmed in, or a manual fee\nrate to us for the funding transaction. If neither are specified, then a\nlax block confirmation target is used.\n",
     "service": "Lightning",
+    "stream": true,
     "args": [
       {
         "name": "node_pubkey",
@@ -668,6 +670,7 @@
   "closeChannel": {
     "description": "CloseChannel attempts to close an active channel identified by its channel\noutpoint (ChannelPoint). The actions of this method can additionally be\naugmented to attempt a force close after a timeout period in the case of an\ninactive peer. If a non-force close (cooperative closure) is requested,\nthen the user can specify either a target number of blocks until the\nclosure transaction is confirmed, or a manual fee rate. If neither are\nspecified, then a default lax, block confirmation target is used.\n",
     "service": "Lightning",
+    "stream": true,
     "args": [
       {
         "name": "channel_point",
@@ -728,6 +731,7 @@
   "sendPayment": {
     "description": "SendPayment dispatches a bi-directional streaming RPC for sending payments\nthrough the Lightning Network. A single RPC invocation creates a persistent\nbi-directional stream allowing clients to rapidly send payments through the\nLightning Network with a single persistent connection.\n",
     "service": "Lightning",
+    "stream": true,
     "args": [
       {
         "name": "dest",
@@ -854,6 +858,7 @@
   "sendToRoute": {
     "description": "SendToRoute is a bi-directional streaming RPC for sending payment through\nthe Lightning Network. This method differs from SendPayment in that it\nallows users to specify a full route manually. This can be used for things\nlike rebalancing, and atomic swaps.\n",
     "service": "Lightning",
+    "stream": true,
     "args": [
       {
         "name": "payment_hash",
@@ -1214,6 +1219,7 @@
   "subscribeInvoices": {
     "description": "SubscribeInvoices returns a uni-directional stream (server -> client) for\nnotifying the client of newly added/settled invoices. The caller can\noptionally specify the add_index and/or the settle_index. If the add_index\nis specified, then we'll first start by sending add invoice events for all\ninvoices with an add_index greater than the specified value.  If the\nsettle_index is specified, the next, we'll send out all settle events for\ninvoices with a settle_index greater than the specified value.  One or both\nof these fields can be set. If no fields are set, then we'll only send out\nthe latest add/settle events.\n",
     "service": "Lightning",
+    "stream": true,
     "args": [
       {
         "name": "add_index",
@@ -1623,6 +1629,7 @@
   "subscribeChannelGraph": {
     "description": "SubscribeChannelGraph launches a streaming RPC that allows the caller to\nreceive notifications upon any changes to the channel graph topology from\nthe point of view of the responding node. Events notified include: new\nnodes coming online, nodes updating their authenticated attributes, new\nchannels being advertised, updates in the routing policy for a directional\nchannel edge, and when channels are closed on-chain.\n",
     "service": "Lightning",
+    "stream": true,
     "args": [],
     "response": [
       {

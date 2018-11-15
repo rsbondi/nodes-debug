@@ -141,10 +141,26 @@ class LndController {
                 if(opt.length && opt[0].type == 'bytes') opts[k] = Buffer.from(opts[k], encoding)
             })
             try {
-                this.instance[service][method](opts, (err, result) => {
-                    if (err) reject(err)
-                    else resolve(result)
-                });
+                if(MonacoHandler._commands[method].stream) {
+                     var call = this.instance[service][method](opts)
+                     const callstr = '// '+method+' '+(opts ? JSON.stringify(opts):'')
+                     this.constructor._appendToEditor(callstr + '\n\n')
+                     call.on('data', (response) => {
+                        this._handleNotification(`${callstr} STREAM RESPONSE\n${JSON.stringify(response,null,2)}\n\n`)
+                      });
+                     call.on('status', (status) => {
+                        console.log('status', status)
+                        this._handleNotification(`${callstr} STREAM RESPONSE\n${JSON.stringify(status,null,2)}\n\n`)
+                      });
+                     call.on('end', () => {
+                        // The server has closed the stream.
+                      });                
+                } else {
+                    this.instance[service][method](opts, (err, result) => {
+                        if (err) reject(err)
+                        else resolve(result)
+                    });
+                }
             } catch(e) {reject(e.message)}
         }
 
@@ -203,6 +219,23 @@ class LndController {
         MonacoHandler.resultEditor.revealPosition({ lineNumber: MonacoHandler.resultEditor.getModel().getLineCount(), column: 0 })
                 
     }
+
+    _handleNotification (text)  {
+        const model = MonacoHandler.models[this.id]
+        if(!model) return
+        const lineCount = model.result.getLineCount();
+        const lastLineLength = model.result.getLineMaxColumn(lineCount);
+    
+        const range = new monaco.Range(lineCount, lastLineLength, lineCount, lastLineLength);
+    
+        model.result.pushEditOperations([new monaco.Selection(1, 1, 1, 1)],
+                        [{ range: range, text: text }],
+                        () => [new monaco.Selection(model.result.getLineCount(),0,model.result.getLineCount(),0)])
+        if(MonacoHandler._store.state.Nodes.currentIndex == this.id)
+            MonacoHandler.resultEditor.revealPosition({ lineNumber: MonacoHandler.resultEditor.getModel().getLineCount(), column: 0 })
+    }
+
+
 
 
 }

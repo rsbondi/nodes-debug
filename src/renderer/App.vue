@@ -365,7 +365,6 @@ export default {
           return;
         }
         
-        // TODO: PATH - join and check env
         const dir = path.resolve(`${__dirname}/../../dist/build_nodetypes/${currentNode.type}`)
         let nodetypeModules;
         try {
@@ -468,7 +467,7 @@ export default {
     const path = require("path");
 
     try {
-      const dir = path.resolve(`${__dirname}/../../dist/build_nodetypes`) // TODO: PATH - join and check env
+      const dir = path.resolve(`${__dirname}/../../dist/build_nodetypes`)
 
       const nodetypes = fs.readdirSync(dir);
       nodetypes.forEach(n => this.nodeTypes.push({ index: `${n}`, name: n }));

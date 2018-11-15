@@ -19,11 +19,13 @@ let currentService = ''
 lines.forEach(l => {
     const rpc = l.match(/rpc ([a-zA-Z]+)\s?\((stream )?([a-zA-Z]+)\) returns \((stream )?([a-zA-Z]+)\)/)
     if(rpc) {
-        // TODO: if rpc[4] add flag to command to handle differently in code
-        // TODO: if rpc[3] maybe ? save to quick pick for write ?
-        commands[rpc[1].slice(0, 1).toLowerCase()+rpc[1].slice(1)] = {
-            request: rpc[3], returns: rpc[5], description: description, service: currentService
+        // TODO: if rpc[2] maybe ? save to quick pick for write ?
+        const key = rpc[1].slice(0, 1).toLowerCase()+rpc[1].slice(1)
+        commands[key] = {
+            request: rpc[3], returns: rpc[5], description: description, 
+            service: currentService
         }
+        if(rpc[4]) commands[key].stream = true
     }
 
     const service = l.match(/^service\s+([a-zA-Z_]+)/)
