@@ -125,31 +125,27 @@ class MonacoHandler {
                     provideCompletionItems: (model, position) => {
                         var tokens = monaco.editor.tokenize(model.getLineContent(position.lineNumber), 'json')
                         var token = tokens[0].filter(t => t.offset == (position.column-2))
+                        const block = model.getValueInRange({
+                            startColumn: 1, startLineNumber: l, endColumn: position.column, endLineNumber: position.lineNumber
+                        })
+                        const re = /("([^"]|"")*")/g
+                        let stringsMatch = block.match(re)
+                        const word = model.getWordAtPosition({
+                            lineNumber: l, column: 1})
                         if(token.length && token[0].type == "string.key.json") {
                             for(var l=position.lineNumber; l>0; l--) {
-                                const word = model.getWordAtPosition({
-                                    lineNumber: l, column: 1})
                                 const keys = Object.keys(this._commands)
                                 if(word && ~keys.indexOf(word.word)) {
-
-                                    // here I have the command, need to check if any args have args
-                                    // loop back again from position and check against args
-                                    // if found, return its args and not commands args
 
                                     const argargs = this._commands[word.word].args.filter(a => a.args)
 
                                     if(argargs.length) {
-                                        const block = model.getValueInRange({
-                                            startColumn: 1, startLineNumber: l, endColumn: position.column, endLineNumber: position.lineNumber
-                                        })
-                                        const re = /("([^"]|"")*")/g
-                                        let m = block.match(re)
-                                        if(m) {
+                                        if(stringsMatch) {
                                             const argnames = argargs.map(a => a.name)
-                                            m = m.filter(f => ~argnames.indexOf(f.replace(/"/g, '')))
-                                            if(m.length) {
-                                                const key = m[m.length-1].replace(/"/g, '')
-                                                const keyIndex = block.indexOf(m[m.length-1])
+                                            stringsMatch = stringsMatch.filter(f => ~argnames.indexOf(f.replace(/"/g, '')))
+                                            if(stringsMatch.length) {
+                                                const key = stringsMatch[stringsMatch.length-1].replace(/"/g, '')
+                                                const keyIndex = block.indexOf(stringsMatch[stringsMatch.length-1])
                                                 const lastBrace = block.lastIndexOf("}")
                                                 if((lastBrace==-1 || keyIndex > lastBrace) && ~argnames.indexOf(key))
                                                     return this._commands[word.word].args.filter(a => a.name == key)[0].args.map(a => {
@@ -162,7 +158,6 @@ class MonacoHandler {
                                                     })
                                             }
                                         }
-                                        console.log('complete from block', m)
                                     }
 
                                     return this._commands[word.word].args.map(a => {
@@ -176,6 +171,25 @@ class MonacoHandler {
                                 }
                             }
                         }
+
+                        if(token.length && token[0].type == "delimiter.colon.json") {
+                            if(stringsMatch) {
+                                const argenum = this._commands[word.word].args.filter(a => a.enum && a.name == stringsMatch[stringsMatch.length-1].replace(/"/g, ''))
+                                if(argenum.length) {
+                                    return argenum.reduce((o, a) => {
+                                        Object.keys(a.enum).forEach(k => {
+                                            o.push( {
+                                                label: k,
+                                                insertText: k,
+                                                kind: monaco.languages.CompletionItemKind.Enum
+                                            })
+                                        })
+                                        return o
+                                    },[])
+                                }
+                            }
+                        }
+
                         if(tokens[0].length==1 && tokens[0][0].offset == 0 ){
                             return Object.keys(this._commands).map(k => {
                                 return {
@@ -189,7 +203,7 @@ class MonacoHandler {
                         return []
                     
                     },
-                    triggerCharacters: ['"']
+                    triggerCharacters: ['"', ":"]
                 });
                                 monaco.languages.setLanguageConfiguration(this.lang, {
                     autoClosingPairs: [

@@ -250,7 +250,11 @@
       {
         "name": "type",
         "type": "AddressType",
-        "description": "The address type"
+        "description": "The address type",
+        "enum": {
+          "WITNESS_PUBKEY_HASH": 0,
+          "NESTED_PUBKEY_HASH": 1
+        }
       }
     ],
     "response": [

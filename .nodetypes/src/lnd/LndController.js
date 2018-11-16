@@ -83,8 +83,19 @@ class LndController {
         try {
             params = chunks.length > 1 ? JSON.parse(val.slice(chunks[0].length)) : {}
         } catch (e) {
-            this.constructor._appendToEditor(e+"\n")
-            return
+            const checkEnum = MonacoHandler._commands[method]
+            const enums = checkEnum.args.filter(a => a.enum)
+            let commandString = val.slice(chunks[0].length)
+            enums.forEach(en => {
+                Object.keys(en.enum).forEach(k => {
+                    commandString = commandString.replace(k, en.enum[k])
+                })
+            })
+            try {params = JSON.parse(commandString)} catch(ohwell) {}
+            if(!params) {
+                this.constructor._appendToEditor(e+"\n")
+                return
+            }
         }
 
         this._postRPC(method, params, service).then(response => {

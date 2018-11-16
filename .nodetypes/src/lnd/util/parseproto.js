@@ -10,6 +10,8 @@ let commands = {}
 let messages = {}
 let inmsg = false
 let inenum = false
+let enums = {}
+let currentEnum = ""
 let currentMsg = ""
 let description = ""
 let incomment = false
@@ -35,15 +37,27 @@ lines.forEach(l => {
     if(uncom) incomment = false
     if(incomment) description += l.trimLeft()+"\n"
 
+    if(inenum) {
+        const e = l.match(/([A-Z_]+)\s=\s([0-9]+)/)
+        if(e) 
+            enums[currentEnum][e[1]] = parseInt(e[2], 10)
+    }
+
     if(inmsg) {
         const comment = l.match(/\/\/\/ (.+)/)
         if(comment) description = comment[1]
-        const field = l.match(/([a-zA-Z0-9]+) ([a-zA-Z_]+)\s?=/)
+        const field = l.match(/([a-zA-Z0-9_]+) ([a-zA-Z_]+)\s?(=|{)/)
         if(field && field[1]!='message' && !incomment && !comment) {
             if(field[1]=='enum') {
                 inenum = true
-            } else {
-                messages[currentMsg].fields.push({name: field[2], type: field[1], description: ''+description})
+                currentEnum = field[2]
+                enums[currentEnum] = {}
+            } else if(field[1] != 'oneof') {
+                let msgObj = {name: field[2], type: field[1], description: ''+description}
+                if(currentEnum && msgObj.type == currentEnum) {
+                    msgObj.enum = enums[currentEnum]
+                }
+                messages[currentMsg].fields.push(msgObj)
             }
             description = ""
         }
@@ -70,7 +84,6 @@ lines.forEach(l => {
 Object.keys(commands).forEach(k => {
     let c = commands[k]
     c.args = messages[c.request].fields
-    // TODO: loop through fields and check for messages for type, then what?
     c.args.forEach(a => {
         if(messages[a.type]) {
             a.args = messages[a.type].fields.filter(f => f.type != 'oneof')
