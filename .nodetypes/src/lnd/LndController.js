@@ -1,6 +1,4 @@
 const fs = require('fs')
-const { BitcoinController } = require('../bitcoin/BitcoinController')
-const path = require('path')
 const Config = require('./config')
 const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader')

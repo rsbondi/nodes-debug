@@ -2,7 +2,7 @@
 
 ## Description
 
-This is intended to be a general purpose tool to aid in the development of bitcoin or other similar applications(currently only bitcoin core and btcd supported).
+This is intended to be a general purpose tool to aid in the development of bitcoin or other similar applications(currently only bitcoin core, btcd and lnd supported).
 
 It provides a way to interact with multiple rpc nodes.  
 
@@ -53,7 +53,7 @@ All parameters are optional, defaults will be used, **Name** is recommended as i
 * **Name**: What you want to call it, this will appear it it's tab
 * **Host**: Node's IP address
 * **Port**: The RPC port of the node
-* **Config**: Path to configuration file, this is where the node's RPC authentication information is located in format of standard `bitcoin.conf`(or btcd.conf or format of third party's choosing)
+* **Config**: Path to configuration file, this is where the node's RPC authentication information is located in format of standard `bitcoin.conf`(btcd.conf, lnd.conf or format of third party's choosing)
 
 After one or more nodes are added, you can save the configuration by selecting form the menu `Config -> Save`
 
@@ -112,6 +112,8 @@ Commands are executed by pressing F5, pressing the codelens helper or from the c
 
 # Development
 
+Notice, developing third party node types is encouraged, but please check with me before doing so, the architecture is likely to change as more insight is gained in development.
+
 This utility supports multiple node types.  It ships with `bitcoin`(bitcoin core) and `btcd`.  The node types are defined in the `.nodetypes` directory.  To create a node of a different type, follow the example in the `bitcoin` directory.  The `${your_node_type}Controller.js` file needs to implement the methods that do not begin with an underscore.  For questions feel free contact me directly.
 
 Also, if your module uses external packages that are not in the root `package.json` file of this repository, you will need to include your own `package.json` file, you only need to include packages that are not already covered in the root file.  See `.nodetypes/src/btcd/package.json` as an example, which uses `ws` package.
@@ -124,11 +126,6 @@ To add a third pary node type to an existing installation, add the subdirectory 
 
 # Disclaimer
 This is meant as a development tool and suggested to use on testnet or regtest, use on mainnet at your own risk.
-
-#WIP
-
-refactoring is taking place on the `refactor-compile` branch of this repository to allow for multiple
-node types, currently btcd, help with testing would be appreciated
 
 ---
 

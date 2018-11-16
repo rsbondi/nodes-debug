@@ -130,11 +130,18 @@ class MonacoHandler {
                         })
                         const re = /("([^"]|"")*")/g
                         let stringsMatch = block.match(re)
-                        const word = model.getWordAtPosition({
-                            lineNumber: l, column: 1})
+                        let word
+                        const keys = Object.keys(this._commands)
+                        for(var l=position.lineNumber; l>0; l--) {
+                            word = model.getWordAtPosition({
+                                lineNumber: l, column: 1})                            
+                            if(word && ~keys.indexOf(word.word)) break;
+                        }
                         if(token.length && token[0].type == "string.key.json") {
-                            for(var l=position.lineNumber; l>0; l--) {
-                                const keys = Object.keys(this._commands)
+                            // for(var l=position.lineNumber; l>0; l--) {
+                            //     const keys = Object.keys(this._commands)
+                            //     word = model.getWordAtPosition({
+                            //         lineNumber: l, column: 1})
                                 if(word && ~keys.indexOf(word.word)) {
 
                                     const argargs = this._commands[word.word].args.filter(a => a.args)
@@ -169,7 +176,7 @@ class MonacoHandler {
                                         }
                                     })
                                 }
-                            }
+                            //}
                         }
 
                         if(token.length && token[0].type == "delimiter.colon.json") {
