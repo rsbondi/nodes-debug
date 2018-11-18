@@ -32,14 +32,27 @@ class LndController {
             this.instance.Lightning.getInfo({}, (err, inf) => {
                 this._info = inf
                 if(err) reject(err)
-                else resolve(this._info)
+                else {
+                    this.instance.Lightning.walletBalance({}, (errw, infw) => {
+                        this._info = Object.assign(this._info, infw)
+                        if(errw) reject(errw)
+                        else resolve(this._info)
+                    })
+                
+                }
             })
         })
     }
 
     getPeers() {
         return new Promise((resolve, reject) => {
-            resolve({})
+            this.instance.Lightning.listPeers({}, (err, peers) => {
+                if(err) reject(err)
+                else  this.instance.Lightning.listChannels({}, (errc, chans) => {
+                    if(errc) reject(errc)
+                    resolve({peers, chans})
+                })
+            })
         })
     }
     

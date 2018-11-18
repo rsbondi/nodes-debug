@@ -52,6 +52,20 @@
       <div class="value">{{ JSON.stringify(renderData.chains) }}</div>
     </div>
 
+    <h3>Wallet</h3>
+    <div class="info-group">
+      <div class="label">Balance</div>
+      <div class="value">{{ renderData.total_balance }}</div>
+    </div>
+    <div class="info-group">
+      <div class="label">Confirmed</div>
+      <div class="value">{{ renderData.confirmed_balance }}</div>
+    </div>
+    <div class="info-group">
+      <div class="label">Unconfirmed</div>
+      <div class="value">{{ renderData.unconfirmed_balance }}</div>
+    </div>
+
   </div>
 </template>
 
