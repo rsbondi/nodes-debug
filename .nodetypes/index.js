@@ -25,7 +25,7 @@ nodetypes.forEach(t => {
       fs.writeFileSync(path.join(out, t, f), fileContent)
     else
       compiler.compile(fileContent, path.join(src, t, f), (err, result) => {
-        fs.writeFileSync(path.join(out, t, f.replace('.vue', '.js')), result)
+        fs.writeFileSync(path.join(out, t, f.replace('.vue', '.vue.js')), result)
       })
   })
   if (fs.existsSync(path.join(out, t, 'package.json')) && !fs.existsSync(path.join(out, t, 'package-lock.json'))) {

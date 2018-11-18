@@ -377,25 +377,27 @@ export default {
 
         nodetypeModules.forEach(mod => {
           if(fs.lstatSync(path.join(dir, mod)).isDirectory() || ~['package.json', 'package-lock.json'].indexOf(mod)) return
-          if (mod.slice(-13) != "Controller.js") {
+          if (mod.slice(-7) == ".vue.js") {
             promises.push(new Promise((resolve, reject) => {
               resolve(requireFromPath(dir, mod))
             }))
 
-          } else {
+          } else if (mod.slice(-3) == ".js"){
             (new Promise((resolve, reject) => {
               resolve(requireFromPath(dir, mod))
             }))
               .then(c => {
-                this.$store.commit("node_controller_type_loaded", c);
-                const controller = new c.controller(currentNode);
-                this.$store.commit("node_set_index", currentNode.index);
-                this.$store.commit("node_instantiate_controller", {
-                  index: currentNode.index,
-                  type: currentNode.type,
-                  controller: controller
-                });
-                this.callService();
+                if (c.controller) {
+                  this.$store.commit("node_controller_type_loaded", c);
+                  const controller = new c.controller(currentNode);
+                  this.$store.commit("node_set_index", currentNode.index);
+                  this.$store.commit("node_instantiate_controller", {
+                    index: currentNode.index,
+                    type: currentNode.type,
+                    controller: controller
+                  });
+                  this.callService();
+                }
               })
             .catch(e => {console.log(e); resolve()});
           }

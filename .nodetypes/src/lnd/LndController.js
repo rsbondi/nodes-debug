@@ -4,8 +4,6 @@ const grpc = require('grpc');
 const protoLoader = require('@grpc/proto-loader')
 //process.env.GRPC_SSL_CIPHER_SUITES = 'HIGH+ECDSA'
 
-// TODO: parse enums
-
 process.env.GRPC_SSL_CIPHER_SUITES =
   'ECDHE-RSA-AES128-GCM-SHA256:' +
   'ECDHE-RSA-AES128-SHA256:' +
@@ -25,12 +23,17 @@ class LndController {
     }
 
     static register(editor, resultEditor, store) {
+        this._store = store
         return MonacoHandler.register(editor, resultEditor, store, this.lang)
     }
 
-        getInfo() {
+    getInfo() {
         return new Promise((resolve, reject) => {
-            resolve({})
+            this.instance.Lightning.getInfo({}, (err, inf) => {
+                this._info = inf
+                if(err) reject(err)
+                else resolve(this._info)
+            })
         })
     }
 
@@ -43,6 +46,7 @@ class LndController {
     update(cfg) {
         this.id = cfg.index
         this._config = new Config(cfg)
+        this._info = {}
         
         const setupGrpc = () => {
             this.instance = this._createInstance()

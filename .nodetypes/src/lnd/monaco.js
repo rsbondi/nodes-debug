@@ -138,45 +138,40 @@ class MonacoHandler {
                             if(word && ~keys.indexOf(word.word)) break;
                         }
                         if(token.length && token[0].type == "string.key.json") {
-                            // for(var l=position.lineNumber; l>0; l--) {
-                            //     const keys = Object.keys(this._commands)
-                            //     word = model.getWordAtPosition({
-                            //         lineNumber: l, column: 1})
-                                if(word && ~keys.indexOf(word.word)) {
+                            if(word && ~keys.indexOf(word.word)) {
 
-                                    const argargs = this._commands[word.word].args.filter(a => a.args)
+                                const argargs = this._commands[word.word].args.filter(a => a.args)
 
-                                    if(argargs.length) {
-                                        if(stringsMatch) {
-                                            const argnames = argargs.map(a => a.name)
-                                            stringsMatch = stringsMatch.filter(f => ~argnames.indexOf(f.replace(/"/g, '')))
-                                            if(stringsMatch.length) {
-                                                const key = stringsMatch[stringsMatch.length-1].replace(/"/g, '')
-                                                const keyIndex = block.indexOf(stringsMatch[stringsMatch.length-1])
-                                                const lastBrace = block.lastIndexOf("}")
-                                                if((lastBrace==-1 || keyIndex > lastBrace) && ~argnames.indexOf(key))
-                                                    return this._commands[word.word].args.filter(a => a.name == key)[0].args.map(a => {
-                                                        return {
-                                                            label: a.name,
-                                                            insertText: a.name,
-                                                            detail: a.type,
-                                                            documentation: a.description
-                                                        }
-                                                    })
-                                            }
+                                if(argargs.length) {
+                                    if(stringsMatch) {
+                                        const argnames = argargs.map(a => a.name)
+                                        stringsMatch = stringsMatch.filter(f => ~argnames.indexOf(f.replace(/"/g, '')))
+                                        if(stringsMatch.length) {
+                                            const key = stringsMatch[stringsMatch.length-1].replace(/"/g, '')
+                                            const keyIndex = block.indexOf(stringsMatch[stringsMatch.length-1])
+                                            const lastBrace = block.lastIndexOf("}")
+                                            if((lastBrace==-1 || keyIndex > lastBrace) && ~argnames.indexOf(key))
+                                                return this._commands[word.word].args.filter(a => a.name == key)[0].args.map(a => {
+                                                    return {
+                                                        label: a.name,
+                                                        insertText: a.name,
+                                                        detail: a.type,
+                                                        documentation: a.description
+                                                    }
+                                                })
                                         }
                                     }
-
-                                    return this._commands[word.word].args.map(a => {
-                                        return {
-                                            label: a.name,
-                                            insertText: a.name,
-                                            detail: a.type,
-                                            documentation: a.description
-                                        }
-                                    })
                                 }
-                            //}
+
+                                return this._commands[word.word].args.map(a => {
+                                    return {
+                                        label: a.name,
+                                        insertText: a.name,
+                                        detail: a.type,
+                                        documentation: a.description
+                                    }
+                                })
+                            }
                         }
 
                         if(token.length && token[0].type == "delimiter.colon.json") {
