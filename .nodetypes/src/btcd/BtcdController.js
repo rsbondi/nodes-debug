@@ -15,6 +15,7 @@ class BtcdController extends BitcoinController {
         const inf = BtcdController.registerInfo
         if(!inf) return
         super.register(inf.editor, inf.resultEditor, inf.store).then(r => {
+            BtcdController.emitter.emit('controller-ready')
             inf.resolve()
         })
     }
@@ -193,6 +194,9 @@ class BtcdController extends BitcoinController {
 }
 
 BtcdController.lang = 'btcd-rpc'
+const EventEmitter = require('events');
+class MyEmitter extends EventEmitter {}
+BtcdController.emitter = new MyEmitter()
 
 module.exports = {
     type: 'btcd',

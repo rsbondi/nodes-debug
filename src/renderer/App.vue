@@ -348,14 +348,15 @@ export default {
           }
           if (!~this.$store.state.Nodes.registeredTypes.indexOf(currentNode.type)) {
             this.$store.commit("node_set_index", currentNode.index);
-            this.$store.state.Nodes.controllers[currentNode.type].register(
-              window.commandEditor,
-              window.resultEditor,
-              this.$store
-            ).then(() => {
-              this.$store.commit('node_controller_type_registered', currentNode.type)
-              this.nodeChange(currentNode).then(() => resolve())
-            }).catch(() => this.$message.error(`unable to register controller type ${currentNode.type}`))
+            if (!this.$store.state.Nodes.consoleReady)
+              this.$store.state.Nodes.controllers[currentNode.type].register(
+                window.commandEditor,
+                window.resultEditor,
+                this.$store
+              ).then(() => {
+                this.$store.commit('node_controller_type_registered', currentNode.type)
+                this.nodeChange(currentNode).then(() => resolve())
+              }).catch(() => this.$message.error(`unable to register controller type ${currentNode.type}`))
             return
           }
           this.$store.commit("node_set_index", currentNode.index);
@@ -396,7 +397,10 @@ export default {
                     type: currentNode.type,
                     controller: controller
                   });
-                  this.callService();
+                  if(c.controller.emitter) {
+                    c.controller.emitter.once('controller-ready', this.callService)
+                  }
+                  else this.callService()
                 }
               })
             .catch(e => {console.log(e); resolve()});
