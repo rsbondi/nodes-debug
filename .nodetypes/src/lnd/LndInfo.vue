@@ -6,7 +6,7 @@
       <div class="value">{{ renderData.alias }}</div>
     </div>
     <div class="info-group">
-      <div class="label">Version</div>
+      <div class="label">Pubkey</div>
       <div class="value">{{ renderData.identity_pubkey }}</div>
     </div>
     <div class="info-group">

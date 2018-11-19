@@ -411,7 +411,7 @@ export default {
             this.$store.commit("node_type_loaded", currentNode.type);
             resolve();
           })
-          .catch(resolve);
+          .catch(e => {console.log(e); resolve()});
       });
     },
     callService(s, p) {

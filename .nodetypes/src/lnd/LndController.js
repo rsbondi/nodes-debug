@@ -24,35 +24,36 @@ class LndController {
 
     static register(editor, resultEditor, store) {
         this._store = store
-        return MonacoHandler.register(editor, resultEditor, store, this.lang)
+        let handler = MonacoHandler.register(editor, resultEditor, store, this.lang)
+        handler.then(() => this.registered = true)
+        return handler
     }
 
     getInfo() {
         return new Promise((resolve, reject) => {
-            this.instance.Lightning.getInfo({}, (err, inf) => {
-                this._info = inf
-                if(err) reject(err)
-                else {
-                    this.instance.Lightning.walletBalance({}, (errw, infw) => {
+            const postit = () => {
+                this._postRPC('getInfo').then(inf => {
+                    this._info = inf
+                    this._postRPC('walletBalance').then(infw => {
                         this._info = Object.assign(this._info, infw)
-                        if(errw) reject(errw)
-                        else resolve(this._info)
+                        resolve(this._info)
                     })
-                
-                }
-            })
+                }).catch(reject)
+            }
+            if(!this.constructor.registered) setTimeout(postit, 500); else postit()
         })
     }
 
     getPeers() {
         return new Promise((resolve, reject) => {
-            this.instance.Lightning.listPeers({}, (err, peers) => {
-                if(err) reject(err)
-                else  this.instance.Lightning.listChannels({}, (errc, chans) => {
-                    if(errc) reject(errc)
-                    resolve({peers, chans})
-                })
-            })
+            const postit = () => {
+                this._postRPC('listPeers').then(peers => {
+                    this._postRPC('listChannels').then(chans => {
+                        resolve({peers, chans})
+                    })
+                }).catch(reject)
+            }
+            if(!this.constructor.registered) setTimeout(postit, 500); else postit()
         })
     }
     
