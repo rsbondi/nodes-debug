@@ -69,12 +69,17 @@ class MonacoHandler {
 
                         if (word && ~Object.keys(this._commands).indexOf(word)) {
                             const cmd = this._commands[word]
-                            let md = `${cmd.description.split("\n").join('\n\n')}\n`
                             let contents = [`**${word}**`].concat(cmd.description)
                             contents.push('### Options\n\n')
                             cmd.args.forEach(a => {
-                                contents.push(`**${a.name}**: _${a.type}_\n\n${a.description.split("\n").join('\n\n\n\n')}\n\n\n\n`)
+                                contents.push(`**${a.name}**: _${a.type}_\n\n${a.description.split("\n").join('\n')}\n`)
                             })
+                            if(!cmd.args.length) contents.push('_none_')
+                            contents.push('### Returns\n\n')
+                            cmd.response.forEach(a => {
+                                contents.push(`**${a.name}**: _${a.type}_\n\n${a.description.split("\n").join('\n')}\n`)
+                            })
+                            if(!cmd.response.length) contents.push('_none_')
                             return {
                                 contents: contents
                             }
