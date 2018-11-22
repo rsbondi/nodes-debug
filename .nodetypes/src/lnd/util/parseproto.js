@@ -1,5 +1,7 @@
 // parses rpc.proto to something useful for code completion, not used in production
 
+// TODO: handle map - `map<string, int64> AddrToAmount = 1;` used in sendMany
+
 const fs = require('fs')
 
 const proto = fs.readFileSync(`${__dirname}/../rpc.proto`).toString('utf8')

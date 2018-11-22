@@ -101,6 +101,10 @@ addmultisigaddress 2
 ]
 ```
 
+#### Using with lnd
+
+Currently streaming subscriptions are supported, but streaming requests are not yet supported, you can use the "Sync" version instead for now, `openChannelSync`, `sendPaymentSync`, and `sendToRouteSync` respectively.
+
 ### Features example, light theme
 
 ![bob and alice](image/alice_pay_bob.gif)
