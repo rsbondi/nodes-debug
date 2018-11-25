@@ -111,19 +111,14 @@ class CLightningController extends BitcoinController {
     }
 
     _interval() {
-        const self = this
-        return new Promise((resolve, reject) => {
-            function doInterval() {
-                if(CLightningController.registered)
-                    Promise.all([]
-                    ).then(() => {
-                        self._infoTime = new Date().getTime()
-                        resolve({})
-                    }).catch(reject)
-                else    
-                    setTimeout(doInterval, 100)
-            }
-            doInterval()
+        return new Promise(async (resolve, reject) => {
+            try {
+                const inf = await this._postRPC({"method": "getinfo"})
+                this._info = inf.data.result
+                const funds = await this._postRPC({"method": "listfunds"})
+                this._info = Object.assign(this._info, funds.data.result)
+                resolve(this._info)
+            } catch(e) {reject(e)}
         })
     }
 
@@ -166,8 +161,9 @@ class CLightningController extends BitcoinController {
                 this.sockpromises[key].resolve({data: obj})
                 this.sockpromises[key] = undefined
             }
-            sock.on('data', (data, flags) => {
-                const obj = JSON.parse(data)
+            sock.on('data', (data) => {
+                const response = typeof data == 'string' ? data : data.toString('utf8')
+                const obj = JSON.parse(response)
                 const key = obj.id
                 if(this.sockpromises && this.sockpromises[key]) {
                     _resolve(key, obj)
