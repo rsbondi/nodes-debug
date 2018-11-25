@@ -315,6 +315,91 @@ class BitcoinController {
                 
     }
 
+    static _setHelpers(response) {
+        this._helpers = response.data.result.split('\n').reduce((o, c, i) => {
+            if (c && !c.indexOf('==') == 0) {
+                const pieces = c.split(' ')
+                o.push({ command: pieces[0], help: pieces.length > 1 ? pieces.slice(1).join(' ') : '' })
+            }
+            return o
+        }, [])
+    }
+
+    static _setSignatureHelp() {
+        monaco.languages.registerSignatureHelpProvider(this.lang, {
+            provideSignatureHelp: (model, position) => {
+                const getBlockIndex = (block, col) => {
+                    let index = -1
+                    let lineindex = block.reduce((o, c, i) => c.offset === 0 ? i : o, -1)
+                    const tokens = monaco.editor.tokenize(block.map(b => b.text).join('\n'), this.lang)
+                    let brackets = []
+                    for (let i = 0; i <= lineindex; i++) {
+                        const token = tokens[i]
+                        token.forEach((t, ti) => {
+                            const prevToken = ti === 0 ? i === 0 ? null : tokens[i - 1][tokens[i - 1].length - 1] : token[ti - 1]
+                            switch (t.type) {
+                                case `white.${this.lang}`:
+                                    if (prevToken.type == `keyword.${this.lang}`) index = 0
+                                    if (~[`number.${this.lang}`, `string.${this.lang}`, `identifier.${this.lang}`].indexOf(prevToken.type) && !brackets.length) index++
+                                    break
+                                case `bracket.square.open.${this.lang}`:
+                                    brackets.unshift('square')
+                                    break
+                                case `bracket.square.close.${this.lang}`:
+                                    brackets.shift('square')
+                                    index++
+                                    break
+
+                            }
+                        });
+                    }
+                    return index
+                }
+                
+                const block = this._getCommandBlock(model, position)
+                let word = ''
+                if (block.length) word = block[0].text.split(' ')[0]
+                if (word) return this._getHelpContent(word).then(response => {
+                    if(!response.data) return {}
+                    let lines = response.data.result.split("\n")
+                    let args = false, desc = false
+                    const obj = lines.reduce((o, c, i) => {
+                        if (!c && args) {
+                            args = false
+                        }
+                        else if (c.match(/Arguments/)) args = true
+                        else if (args) {
+                            let ltokens = c.split(/\s+/)
+                            if (ltokens[0].match(/[0-9]+\./))
+                                o.params[ltokens[1].replace(/"/g, '')] = ltokens.slice(2).join(' ')
+                        }
+                        else if (i > 1 && !c) desc = true
+                        else if (i > 0 && !desc) o.desc += c + "\n"
+                        return o
+                    }, { params: {}, desc: '' })
+                    obj.desc = obj.desc.replace(/(^\n|\n$)/, '')
+                    const index = getBlockIndex(block, position.column)
+                    const params = Object.keys(obj.params).map(k => { return { label: k, documentation: obj.params[k] } })
+                    if (index > -1 && index < params.length)
+                        return {
+                            activeSignature: 0,
+                            activeParameter: index,
+                            signatures: [
+                                {
+                                    label: lines[0],
+                                    parameters: params
+                                }
+                            ]
+                        }
+                    else return {}
+                })
+                else return {}
+
+            },
+            signatureHelpTriggerCharacters: [' ', '\t', '\n']
+        })
+    }
+
     /**
      * This is called only once for each node type and sets up static level data for the type
      * @param {monaco.editor} editor the command editor
@@ -331,14 +416,9 @@ class BitcoinController {
             this.resultEditor = resultEditor
             window.controllerInstances[store.state.Nodes.currentIndex]._getHelp().then(response => {
                 if(!response) { reject(); return }
-                this._helpers = response.data.result.split('\n').reduce((o, c, i) => {
-                    if (c && !c.indexOf('==') == 0) {
-                        const pieces = c.split(' ')
-                        o.push({ command: pieces[0], help: pieces.length > 1 ? pieces.slice(1).join(' ') : '' })
-                    }
-                    return o
-                }, [])
+                this._setHelpers(response)
 
+                // TODO: refactor out each provider section for better estension
                 monaco.languages.setMonarchTokensProvider(this.lang, {
                     tokenizer: {
                         root: [
@@ -404,78 +484,8 @@ class BitcoinController {
                     }
                 });
 
-                monaco.languages.registerSignatureHelpProvider(this.lang, {
-                    provideSignatureHelp: (model, position) => {
-                        const getBlockIndex = (block, col) => {
-                            let index = -1
-                            let lineindex = block.reduce((o, c, i) => c.offset === 0 ? i : o, -1)
-                            const tokens = monaco.editor.tokenize(block.map(b => b.text).join('\n'), this.lang)
-                            let brackets = []
-                            for (let i = 0; i <= lineindex; i++) {
-                                const token = tokens[i]
-                                token.forEach((t, ti) => {
-                                    const prevToken = ti === 0 ? i === 0 ? null : tokens[i - 1][tokens[i - 1].length - 1] : token[ti - 1]
-                                    switch (t.type) {
-                                        case `white.${this.lang}`:
-                                            if (prevToken.type == `keyword.${this.lang}`) index = 0
-                                            if (~[`number.${this.lang}`, `string.${this.lang}`, `identifier.${this.lang}`].indexOf(prevToken.type) && !brackets.length) index++
-                                            break
-                                        case `bracket.square.open.${this.lang}`:
-                                            brackets.unshift('square')
-                                            break
-                                        case `bracket.square.close.${this.lang}`:
-                                            brackets.shift('square')
-                                            index++
-                                            break
+                this._setSignatureHelp()
 
-                                    }
-                                });
-                            }
-                            return index
-                        }
-                        
-                        const block = this._getCommandBlock(model, position)
-                        let word = ''
-                        if (block.length) word = block[0].text.split(' ')[0]
-                        if (word) return this._getHelpContent(word).then(response => {
-                            if(!response.data) return {}
-                            let lines = response.data.result.split("\n")
-                            let args = false, desc = false
-                            const obj = lines.reduce((o, c, i) => {
-                                if (!c && args) {
-                                    args = false
-                                }
-                                else if (c.match(/Arguments/)) args = true
-                                else if (args) {
-                                    let ltokens = c.split(/\s+/)
-                                    if (ltokens[0].match(/[0-9]+\./))
-                                        o.params[ltokens[1].replace(/"/g, '')] = ltokens.slice(2).join(' ')
-                                }
-                                else if (i > 1 && !c) desc = true
-                                else if (i > 0 && !desc) o.desc += c + "\n"
-                                return o
-                            }, { params: {}, desc: '' })
-                            obj.desc = obj.desc.replace(/(^\n|\n$)/, '')
-                            const index = getBlockIndex(block, position.column)
-                            const params = Object.keys(obj.params).map(k => { return { label: k, documentation: obj.params[k] } })
-                            if (index > -1 && index < params.length)
-                                return {
-                                    activeSignature: 0,
-                                    activeParameter: index,
-                                    signatures: [
-                                        {
-                                            label: lines[0],
-                                            parameters: params
-                                        }
-                                    ]
-                                }
-                            else return {}
-                        })
-                        else return {}
-
-                    },
-                    signatureHelpTriggerCharacters: [' ', '\t', '\n']
-                })
                 const execCommandId = editor.addCommand(0, function (wtf, line) { // don't knnow what first argument is???
                     const pos = editor.getPosition()
                     editor.setPosition({ lineNumber: line, column: 1 })
