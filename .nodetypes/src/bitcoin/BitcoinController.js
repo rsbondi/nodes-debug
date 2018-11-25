@@ -400,6 +400,27 @@ class BitcoinController {
         })
     }
 
+    static _setHoverHelp() {
+        monaco.languages.registerHoverProvider(this.lang, {
+            provideHover:  (model, position) => {
+                let word = ''
+                const wordAtPos = model.getWordAtPosition(position)
+                if (wordAtPos) word = wordAtPos.word
+
+                if (word && ~this._helpers.map(h => h.command).indexOf(word)) {
+                    return this._getHelpContent(word).then(response => {
+                        return {
+                            contents: [
+                                `**${word}**`,
+                                { language: 'text', value: response.data.result }
+                            ]
+                        }
+                    })
+                }
+            }
+        });
+    }
+
     /**
      * This is called only once for each node type and sets up static level data for the type
      * @param {monaco.editor} editor the command editor
@@ -465,24 +486,7 @@ class BitcoinController {
                     ],
                 });
                 
-                monaco.languages.registerHoverProvider(this.lang, {
-                    provideHover:  (model, position) => {
-                        let word = ''
-                        const wordAtPos = model.getWordAtPosition(position)
-                        if (wordAtPos) word = wordAtPos.word
-
-                        if (word && ~this._helpers.map(h => h.command).indexOf(word)) {
-                            return this._getHelpContent(word).then(response => {
-                                return {
-                                    contents: [
-                                        `**${word}**`,
-                                        { language: 'text', value: response.data.result }
-                                    ]
-                                }
-                            })
-                        }
-                    }
-                });
+                this._setHoverHelp()
 
                 this._setSignatureHelp()
 

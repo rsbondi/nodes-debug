@@ -13,7 +13,6 @@ class CLightningController extends BitcoinController {
         const inf = CLightningController.registerInfo
         if(!inf) return
         super.register(inf.editor, inf.resultEditor, inf.store).then(r => {
-            console.log('super registered')
             CLightningController.emitter.emit('controller-ready')
             inf.resolve()
         })
@@ -22,15 +21,34 @@ class CLightningController extends BitcoinController {
     static _setHelpers(response) {
         this._helpers = response.data.result.help.reduce((o, c, i) => {
             const pieces = c.command.split(' ')
-            o.push({ command: pieces[0], help: pieces.length > 1 ? pieces.slice(1).join(' ') : '' })
+            o.push({ command: pieces[0], help: pieces.length > 1 ? pieces.slice(1).join(' ') : '' , description: c.description})
             return o
         }, [])
+    }
+
+    static _setHoverHelp() {
+        monaco.languages.registerHoverProvider(this.lang, {
+            provideHover:  (model, position) => {
+                let word = ''
+                const wordAtPos = model.getWordAtPosition(position)
+                if (wordAtPos) word = wordAtPos.word
+
+                if (word && ~this._helpers.map(h => h.command).indexOf(word)) {
+                    return {
+                        contents: [
+                            `**${word}**`,
+                            { language: 'text', value: this._helpers.filter(h => h.command == word)[0].description }
+                        ]
+                    }
+                }
+            }
+        });
     }
 
     static _setSignatureHelp() {
         monaco.languages.registerSignatureHelpProvider(this.lang, {
             provideSignatureHelp: (model, position) => {
-                const getBlockIndex = (block, col) => {
+                const getBlockIndex = (block) => {
                     let index = -1
                     let lineindex = block.reduce((o, c, i) => c.offset === 0 ? i : o, -1)
                     const tokens = monaco.editor.tokenize(block.map(b => b.text).join('\n'), this.lang)
@@ -70,7 +88,6 @@ class CLightningController extends BitcoinController {
                     const helpItem = this._helpers.filter(h => h.command == word)
                     const helpParams = helpItem.length && helpItem[0].help.split(' ') || []
                     const params = helpParams.map(p => { return {label: p}})
-                    //this._helpers.map(h => { return { label: k, documentation: obj.params[k] } })
                     if (index > -1 && index < params.length && helpItem.length)
                         return {
                             activeSignature: 0,
