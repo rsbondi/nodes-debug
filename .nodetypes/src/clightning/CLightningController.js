@@ -123,8 +123,15 @@ class CLightningController extends BitcoinController {
     }
 
     getPeers() {
-        return new Promise((resolve, reject) => {
-            resolve({})
+        return new Promise(async (resolve, reject) => {
+            try {
+                const p = await this._postRPC({"method": "listpeers"})
+                const peers = p.data.result
+                const chan = await this._postRPC({"method": "listchannels"})
+                const chans = chan.data.result
+                const inf = this._info
+                resolve({peers, chans, inf})
+            } catch(e) {reject(e)}
         })
     }
 
