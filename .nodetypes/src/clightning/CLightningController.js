@@ -135,6 +135,23 @@ class CLightningController extends BitcoinController {
         })
     }
 
+    _handleNotification (text)  {
+        console.log('notification', text)
+
+        const model = this.constructor.models[this.id]
+        if(!model) return
+        const lineCount = model.result.getLineCount();
+        const lastLineLength = model.result.getLineMaxColumn(lineCount);
+    
+        const range = new monaco.Range(lineCount, lastLineLength, lineCount, lastLineLength);
+    
+        model.result.pushEditOperations([new monaco.Selection(1, 1, 1, 1)],
+                        [{ range: range, text: "/* NOTIFICATION */\n"+text }],
+                        () => [new monaco.Selection(model.result.getLineCount(),0,model.result.getLineCount(),0)])
+        if(this.constructor._store.state.Nodes.currentIndex == this.id)
+            this.constructor.resultEditor.revealPosition({ lineNumber: this.constructor.resultEditor.getModel().getLineCount(), column: 0 })
+    }
+
     update(cfg) {
         const fs = require('fs')
         const os = require('os')
@@ -174,7 +191,9 @@ class CLightningController extends BitcoinController {
                 const key = obj.id
                 if(this.sockpromises && this.sockpromises[key]) {
                     _resolve(key, obj)
-                } 
+                } else if(this.constructor.resultEditor) {
+                    this._handleNotification(JSON.stringify(JSON.parse(data), null, 2)+"\n\n")
+                }
             });
             sock.on('error', (derp) => {
                 console.log('ERROR:' + derp);
@@ -193,19 +212,17 @@ class CLightningController extends BitcoinController {
     }
 
     _postRPC(payload) {
-        var self = this
-
-        function promiseFunction(resolve, reject) {
+        const promiseFunction = (resolve, reject) => {
             payload.jsonrpc = "2.0"
             payload.params = payload.params || []
             payload.id = payload.method
-            self._sock.write(JSON.stringify(payload))
-            self.sockpromises[payload.method] = {resolve: resolve, reject: reject}
+            this._sock.write(JSON.stringify(payload))
+            this.sockpromises[payload.method] = {resolve: resolve, reject: reject}
             setTimeout(() => {
-                if(self.sockpromises[payload.method]) {
-                    self.sockpromises[payload.method].reject('CONNECTION ERROR')
-                    self.sockpromises[payload.method] = undefined
-                    self.online = false
+                if(this.sockpromises[payload.method]) {
+                    this.sockpromises[payload.method].reject('CONNECTION ERROR')
+                    this.sockpromises[payload.method] = undefined
+                    this.online = false
                 }
             }, 5000)
         }
@@ -213,8 +230,8 @@ class CLightningController extends BitcoinController {
         let promise = new Promise(promiseFunction)        
         .then(d => { this.online = true; return d})
         .catch(e => {
-            self.online = false
-            self.sockpromises[payload.method] = undefined
+            this.online = false
+            this.sockpromises[payload.method] = undefined
             return e.response
         })
 

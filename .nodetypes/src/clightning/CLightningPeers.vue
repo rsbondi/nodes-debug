@@ -72,31 +72,6 @@
     }
   }
 
-/*
-{
-  "jsonrpc": "2.0",
-  "id": "listchannels",
-  "result": {
-    "channels": [
-      {
-        "source": "030bd4a3961c2db7285a0eb7535f690be543c14fbab03fdd6ff93a5f32c75aecea",
-        "destination": "036ff69f785964f009e9839266ac60e715263afb69612b2824cd7fb8b0695a889c",
-        "short_channel_id": "629:1:0",
-        "public": true,
-        "satoshis": 3000000,
-        "message_flags": 1,
-        "channel_flags": 0,
-        "flags": 256,
-        "active": true,
-        "last_update": 1543160485,
-        "base_fee_millisatoshi": 1,
-        "fee_per_millionth": 10,
-        "delay": 6
-      }
-    ]
-  }
-}
-*/
 </script>
 
 <style>

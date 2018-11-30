@@ -55,7 +55,6 @@
         <el-button v-else type="primary" @click="addNewNode">Add</el-button>
       </span>
     </el-dialog>
-  <!-- <router-view></router-view> -->
   </div>
 </template>
 
