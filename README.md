@@ -2,13 +2,13 @@
 
 ## Description
 
-This is intended to be a general purpose tool to aid in the development of bitcoin or other similar applications(currently only bitcoin core, btcd and lnd supported).
+This is intended to be a general purpose tool to aid in the development of bitcoin or other similar applications(currently only bitcoin core, btcd lnd and clightning supported).
 
 It provides a way to interact with multiple rpc nodes.  
 
 The integrated console lets you talk to multiple nodes from a single interface, the commands feature code completion, signature help, syntax highlighting and folding.  Also, help is provided on hover for all commands.  Command results provide folding for better focus and insertion of result parameters into successive commands.
 
-The project is designed such that multiple node types can be added in the future.
+The project is designed such that additional node types can be added in the future.
 
 #### Build Setup
 
@@ -105,6 +105,8 @@ addmultisigaddress 2
 
 Currently streaming subscriptions are supported, but streaming requests are not yet supported, you can use the "Sync" version instead for now, `openChannelSync`, `sendPaymentSync`, and `sendToRouteSync` respectively.
 
+Also, the convention for the console is differnet here.  All parameters are passed as json objects in key/value format since the grpc interface differs from conventional and there is no positional relationship, all parameters are sent by name.
+
 ### Features example, light theme
 
 ![bob and alice](image/alice_pay_bob.gif)
@@ -118,11 +120,11 @@ Commands are executed by pressing F5, pressing the codelens helper or from the c
 
 Notice, developing third party node types is encouraged, but please check with me before doing so, the architecture is likely to change as more insight is gained in development.
 
-This utility supports multiple node types.  It ships with `bitcoin`(bitcoin core) and `btcd`.  The node types are defined in the `.nodetypes` directory.  To create a node of a different type, follow the example in the `bitcoin` directory.  The `${your_node_type}Controller.js` file needs to implement the methods that do not begin with an underscore.  For questions feel free contact me directly.
+This utility supports multiple node types.  It ships with `bitcoin`(bitcoin core) and `btcd` for bitcoin and `lnd` and `clightning` for the lightning network.  The node types are defined in the `.nodetypes` directory.  To create a node of a different type, follow the example in the `bitcoin` directory.  The `${your_node_type}Controller.js` file needs to implement the methods that do not begin with an underscore.  For questions feel free contact me directly.
 
 Also, if your module uses external packages that are not in the root `package.json` file of this repository, you will need to include your own `package.json` file, you only need to include packages that are not already covered in the root file.  See `.nodetypes/src/btcd/package.json` as an example, which uses `ws` package.
 
-Probably a good module development strategy would be to fork this repository, create your own branch and build and test there.  When satisfied, you can release just the source and the build to your own repo.  
+Probably a good module development strategy would be to fork this repository, create your own branch and build and test there.  When satisfied, you can release just the source and the build to your own repo.  Changes made during development in this directory need to be compiled with `npm run compile`.  This will copy all javascript files and compile the `.vue` files to the `dist/build_nodetypes` directory.  Also, it will run `npm install` on the target directory if additional dependencies are included, this only runs if the `package-lock.json` is not found.  If you add dependencies during development, you will need to remove the `package-lock.json` file to trigger this action again.
 
 So for example, if you want to create for ethereum, add the `ethereum` directory to the `.nodetypes/src` directory of the branch on your fork.  Add files for the console and peers, allong with the controller file. So the directory should look something like `EthereumController.js`, `EthereumInfo.vue` and `EthereumPeers.vue`.  The controller must end in Controller.js, for the others the naming is not important but best to stick to the convention.  The info and peers files are flexible as to how you want to display the data, just so it coordinates with the controller.
 
