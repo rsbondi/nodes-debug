@@ -6,7 +6,7 @@ body, .el-tabs__item,.el-table th, .el-table tr, .el-form-item__label,
 }
 
 body, .el-tabs__nav-wrap::after, .el-table__body-wrapper,.el-table th, 
-.el-table tr, .el-dialog, .el-input__inner {
+.el-table tr, .el-dialog, .el-input__inner, .el-loading-mask {
     background: #fff;
 }
 
