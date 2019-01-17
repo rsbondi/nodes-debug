@@ -28,4 +28,14 @@ nodes.nodes.forEach(n => {
     fs.writeFileSync(`${n.config}`, n.cfg)
     delete(n.cfg)
 })
+
+nodes.nodes.push({
+    name: "Bitcoin Regtest", 
+    type: "bitcoin",
+    port: "",
+    host: "",
+    config: `${nodes.nodes[0].config.split('/').slice(0, -2).join('/')}/bitcoin.conf`,
+    index: `bitcoinregtest`,
+})
+
 fs.writeFileSync("config.json", JSON.stringify(nodes))
