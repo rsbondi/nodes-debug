@@ -127,8 +127,8 @@ class CLightningController extends BitcoinController {
             try {
                 const p = await this._postRPC({"method": "listpeers"})
                 const peers = p.data.result
-                const chan = await this._postRPC({"method": "listchannels"})
-                const chans = chan.data.result
+                const chan = await this._postRPC({"method": "listfunds"})
+                const chans = chan.data.result.channels
                 const inf = this._info
                 resolve({peers, chans, inf})
             } catch(e) {reject(e)}
@@ -158,7 +158,7 @@ class CLightningController extends BitcoinController {
         this._info = {}
         this._infoTime = 0
         this.id = cfg.index
-        let rpcFile
+        let rpcFile, lightningDir
         let config 
         
         try {
@@ -167,9 +167,13 @@ class CLightningController extends BitcoinController {
         config.split('\n').forEach(line => {
             let rpcfile = line.match(/^\s?rpc-file\s?=\s?([^#]+)$/)
             if (rpcfile) rpcFile = rpcfile[1]
+            let ldir = line.match(/^\s?lightning-dir\s?=\s?([^#]+)$/)
+            if (ldir) lightningDir = ldir[1]
         })
 
-        if(!rpcFile) rpcFile = `${os.homedir()}/.lightning/lightning-rpc`
+        if(!rpcFile) rpcFile = `lightning-rpc`
+        if(!lightningDir) lightningDir = `${os.homedir()}/.lightning`
+        rpcFile =`${lightningDir}/${rpcFile}`
 
         const setupSocket = () => {
 
