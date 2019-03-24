@@ -243,7 +243,7 @@ class CLightningController extends BitcoinController {
     }
 }
 
-CLightningController.lang = 'btcd-rpc'
+CLightningController.lang = 'clightning-rpc'
 const EventEmitter = require('events');
 class MyEmitter extends EventEmitter {}
 CLightningController.emitter = new MyEmitter()
