@@ -114,14 +114,28 @@ export default {
     console() {
       const fileName = `${os.homedir()}/.nodes-debug/last.conf`;
     
-     if(this.$store.state.Nodes.consoleReady)
-        fs.readFile(fileName, "utf-8", (err, data) => {
+      if(this.$store.state.Nodes.consoleReady) {
+
+        if(process.env.NODE_ENV === 'production' && remote.process.argv.length > 1) {
+          const args = remote.process.argv.reduce((o, c, i) => {
+            if(i) {
+              const kv = c.split('=')
+              o[kv[0]] = kv[1]
+            }
+            return o
+          }, {})
+          this.getConfig(args.config, async () => {
+            await this.nodeChange(this.getCurrentNode())
+          });
+        }
+        else fs.readFile(fileName, "utf-8", (err, data) => {
           if (data) {
             this.getConfig(data, async () => {
               await this.nodeChange(this.getCurrentNode())
             });
           } else this.nodeChange(this.getCurrentNode())
         });
+      }
       return this.$store.state.Nodes.consoleReady
     }
   },

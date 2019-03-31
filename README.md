@@ -10,6 +10,12 @@ The integrated console lets you talk to multiple nodes from a single interface, 
 
 The project is designed such that additional node types can be added in the future.
 
+#### Install - linux-x64
+
+[download](https://moonbreeze.richardbondi.net/nodes-debug-0.1.3-linux-x64.zip), unzip and add to path.
+
+[verify signature](https://moonbreeze.richardbondi.net/SHA256SUM.asc)
+
 #### Build Setup
 
 ``` bash
@@ -30,7 +36,13 @@ npm run dev
 npm install -g electron-packager
 npm run build
 
-# run unit & end-to-end tests
+# to launch built version, add to path
+nodesdebug [config=path/to/config]
+# config is optional, normally when launched it will load that last saved or 
+# loaded configuration, the option in commandline will override allowing you to
+# specify.
+
+# run unit & end-to-end tests (not yet implemented)
 npm test
 
 ```

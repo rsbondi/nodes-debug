@@ -1,6 +1,7 @@
 {
   "name": "nodes-debug",
-  "version": "0.1.2",
+  "productName": "nodesdebug",
+  "version": "0.1.3",
   "author": "Richard Bondi",
   "description": "debug multiple nodes(rpc, websocket etc.) of varying types(bitcoin, others to come)",
   "license": "MIT",
@@ -23,8 +24,8 @@
     "postinstall": ""
   },
   "build": {
-    "productName": "nodes-debug",
-    "appId": "net.richardbondi.nodes-debug",
+    "productName": "nodesdebug",
+    "appId": "net.richardbondi.nodesdebug",
     "directories": {
       "output": "build"
     },
