@@ -12,7 +12,7 @@ The project is designed such that additional node types can be added in the futu
 
 #### Install - linux-x64
 
-[download](https://moonbreeze.richardbondi.net/nodes-debug-0.1.3-linux-x64.zip), unzip and add to path.
+[download](https://moonbreeze.richardbondi.net/nodesdebug-0.1.4-linux-x64.zip), unzip and add to path.
 
 [verify signature](https://moonbreeze.richardbondi.net/SHA256SUM.asc)
 
