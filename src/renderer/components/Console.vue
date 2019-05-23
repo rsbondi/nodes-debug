@@ -99,6 +99,32 @@ export default {
         }
       });
 
+      this.commandEditor.addAction({
+        id: "action-insert-last-result",
+        label: "Insert Last Result",
+        keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_R],
+        precondition: null,
+        keybindingContext: null,
+        contextMenuGroupId: "navigation",
+        contextMenuOrder: 1.2,
+        run: (ed) => {
+          const resultText = this.resultEditor.getValue()
+          let m = resultText.match(/"result"\s?:\s?("[^"]+")/g)
+          if(m) {
+            const last = m[m.length-1].match(/"result"\s?:\s?("[^"]+")/) // last match
+            const word = last[last.length-1]
+            const cmd = ed.getPosition();
+            ed.executeEdits("", [
+              { range: ed.getSelection().clone(), text: word }
+            ]);
+            const col = cmd.column + word.length;
+            ed.setSelection(
+              new monaco.Range(cmd.lineNumber, col, cmd.lineNumber, col)
+            );
+          }
+        }
+      });
+
 
       window.commandEditor = this.commandEditor; // this kills the store, so window
 
