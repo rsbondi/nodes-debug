@@ -113,6 +113,14 @@ addmultisigaddress 2
 ]
 ```
 
+### Keyboard Shortcuts
+| Command   | Description                         |
+| -------   | -----------                         |
+| F5        | execute command at command editor cursor postion |
+| CtrlCmd+r | reverse bytes or change endian of selection |
+| CtrlCmd+i | Insert from result cursor position to command editior selection, this allows easy reuse of results as command arguments
+| Alt+r     | Insert last result(`result` field in JSON response, string only) |
+
 #### Using with lnd
 
 Currently streaming subscriptions are supported, but streaming requests are not yet supported, you can use the "Sync" version instead for now, `openChannelSync`, `sendPaymentSync`, and `sendToRouteSync` respectively.
