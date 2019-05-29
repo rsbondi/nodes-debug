@@ -1,7 +1,7 @@
 {
   "name": "nodes-debug",
   "productName": "nodesdebug",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "Richard Bondi",
   "description": "debug multiple nodes(rpc, websocket etc.) of varying types(bitcoin, others to come)",
   "license": "MIT",
