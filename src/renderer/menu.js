@@ -1,5 +1,5 @@
-const { remote } = require('electron') 
-const { Menu, MenuItem, dialog } = remote
+const { remote, webFrame } = require('electron') 
+const { Menu, MenuItem } = remote
 
 export class MenuHandler {
     constructor(app) {
@@ -36,6 +36,14 @@ export class MenuHandler {
             { label: 'Clear', click() { app.handleMenu('result-clear') } },
             { label: 'Save', click() { app.handleMenu('result-save') } },
             { label: 'Load', click() { app.handleMenu('result-load') } },
+            ]
+        }))
+        
+        menu.append(new MenuItem({
+            label: 'View',
+            submenu: [
+            { label: 'Zoon +', accelerator: 'CmdOrCtrl+=', click() { webFrame.setZoomFactor(webFrame.getZoomFactor()*1.2) } },
+            { label: 'Zoom -', accelerator: 'CmdOrCtrl+-', click() { webFrame.setZoomFactor(webFrame.getZoomFactor()/1.2) } },
             ]
         }))
         
