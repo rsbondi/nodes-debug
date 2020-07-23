@@ -218,6 +218,7 @@ class CLightningController extends BitcoinController {
                 }
             });
             sock.on('error', (derp) => {
+                jsonBuild = ""
                 console.log('ERROR:' + derp);
             })
             sock.on('close', (data) => {
