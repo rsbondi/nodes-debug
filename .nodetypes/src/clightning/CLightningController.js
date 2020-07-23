@@ -201,14 +201,20 @@ class CLightningController extends BitcoinController {
                 this.sockpromises[key].resolve({data: obj})
                 this.sockpromises[key] = undefined
             }
+
+            let jsonBuild = ""
             sock.on('data', (data) => {
                 const response = typeof data == 'string' ? data : data.toString('utf8')
-                const obj = JSON.parse(response)
-                const key = obj.id
-                if(this.sockpromises && this.sockpromises[key]) {
-                    _resolve(key, obj)
-                } else if(this.constructor.resultEditor) {
-                    this._handleNotification(JSON.stringify(JSON.parse(data), null, 2)+"\n\n")
+                jsonBuild += response
+                if (jsonBuild.slice(-2) === "\n\n") {
+                    const obj = JSON.parse(jsonBuild)
+                    const key = obj.id
+                    if(this.sockpromises && this.sockpromises[key]) {
+                        _resolve(key, obj)
+                    } else if(this.constructor.resultEditor) {
+                        this._handleNotification(JSON.stringify(JSON.parse(data), null, 2)+"\n\n")
+                    }
+                    jsonBuild = ""
                 }
             });
             sock.on('error', (derp) => {
