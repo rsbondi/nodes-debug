@@ -58,7 +58,7 @@
     }
   },
   "dependencies": {
-    "axios": "^0.16.1",
+    "axios": "^0.21.1",
     "element-ui": "^2.2.1",
     "monaco-editor": "^0.10.1",
     "require-from-string": "^2.0.2",
